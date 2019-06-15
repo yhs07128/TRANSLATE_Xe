@@ -71,6 +71,8 @@ int main()
         std::cin >> batches;
     }
 
+    int ions = 0;
+
     for (int j = 0; j < volts_list.size(); j++)
     {
         for (int i = 0; i < batches; i++)
@@ -88,12 +90,12 @@ int main()
 
             if (dimensions == 1)
             {
-                Electron<double> elec(volts_list[j], generator, std_gauss, argon_dist, elec_dist);
+                Electron<double> elec(ions, volts_list[j], generator, std_gauss, argon_dist, elec_dist);
                 generate_plot<double>(elec, cutoff, file, write_every);
             }
             else if (dimensions == 3)
             {
-                Electron<Vec> elec(volts_list[j], generator, std_gauss, argon_dist, elec_dist);
+                Electron<Vec> elec(ions, volts_list[j], generator, std_gauss, argon_dist, elec_dist);
                 generate_plot<Vec>(elec, cutoff, file, write_every);
             }
 

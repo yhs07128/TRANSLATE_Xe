@@ -3,6 +3,7 @@
 
 #include <random>
 #include <array>
+#include <vector>
 #include <assert.h>
 
 #include "Constants.h"
@@ -20,15 +21,16 @@ public:
     double total_time;
 
     double energy;
-    int ionized;
+    int& ionized;
+    std::vector<Electron<T>*> ionization_electrons;
 
     std::mt19937 &generator;
     std::normal_distribution<double> &std_gauss;
     std::normal_distribution<double> &argon_dist;
     std::normal_distribution<double> &elec_dist;
 
-    Electron(double volts, std::mt19937 &gen, std::normal_distribution<double> &std, std::normal_distribution<double> &arg, std::normal_distribution<double> &elec):
-        x(0), v(random_velocity<T>(arg, gen)), accel((e / m_e) * volts * 1e2), volts_per_cm(volts), total_time(0), ionized(0),
+    Electron(int &ions, double volts, std::mt19937 &gen, std::normal_distribution<double> &std, std::normal_distribution<double> &arg, std::normal_distribution<double> &elec):
+        ionized(ions), x(0), v(random_velocity<T>(arg, gen)), accel((e / m_e) * volts * 1e2), volts_per_cm(volts), total_time(0),
         generator(gen), std_gauss(std), argon_dist(arg), elec_dist(elec)
     {
         energy = 0.5 * m_e * v * v * 6.242e18;
@@ -66,6 +68,9 @@ public:
 
     void update()
     {
+        for (auto elec : ionization_electrons)
+            elec->update();
+
         time_to_collision = next_collision(index(abs(v)));
 
         x += v * time_to_collision;
@@ -83,7 +88,10 @@ public:
         double rand = drand48();
 
         if (rand < ion_prob)
+        {
+            ionization_electrons.push_back(new Electron<T>(ionized, volts_per_cm, generator, std_gauss, argon_dist, elec_dist));
             ionized++;
+        }
         else if (rand < (ion_prob + col_prob))
         {
             T n = random_unit_vector<T>(std_gauss, generator);

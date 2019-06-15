@@ -22,7 +22,7 @@ def liquid_sigma_p(eV, S, gas_sigma_p):
     return gas_sigma_p(eV)
 
 def E_to_v(eV):
-    return math.sqrt((2 * eV * 1.60218e-19) / (m_e))
+    return np.sqrt((2 * eV * 1.60218e-19) / (m_e))
 
 if __name__ == '__main__':
     opts, args = getopt.getopt(sys.argv[1:], "sdp")
@@ -63,40 +63,46 @@ if __name__ == '__main__':
 
         plt.ylabel(r'$\sigma$ (cm$^2$)')
 
+    y_vals1 = []
+    y_vals2 = []
+    y_vals3 = []
+    y_tots = []
+
+    for i in x:
+        y_vals1.append(sigma_i_func(i) * E_to_v(i) * 1e2)
+
+    for i in x:
+        y_vals2.append(liquid_sigma_e(i, sigma_e_func) * E_to_v(i) * 1e2)
+
+    for i in x:
+        y_vals3.append(liquid_sigma_p(i, S_func, sigma_p_func) * E_to_v(i) * 1e2)
+
+    for i in range(len(x)):
+        y_tots.append((y_vals1[i] + y_vals2[i] + y_vals3[i]))
+
     if plot_probabilities:
-        y_vals1 = []
-        for i in x:
-            y_vals1.append(sigma_i_func(i) * E_to_v(i) * 1e2)
         plt.plot(x, y_vals1, label=r'$v\sigma_I(v)$')
-
-        y_vals2 = []
-        for i in x:
-            y_vals2.append(liquid_sigma_e(i, sigma_e_func) * E_to_v(i) * 1e2)
         plt.plot(x, y_vals2, label=r'$v\sigma_E(v)$')
-
-        y_vals3 = []
-        for i in x:
-            y_vals3.append(liquid_sigma_p(i, S_func, sigma_p_func) * E_to_v(i) * 1e2)
         plt.plot(x, y_vals3, label=r'$v\sigma_p(v)$')
-
-        y_tots = []
-        for i in range(len(x)):
-            y_tots.append((y_vals1[i] + y_vals2[i] + y_vals3[i]))
         plt.plot(x, y_tots, label=r'$v\sigma_{total}(v)$')
-
         plt.ylabel(r'$v\sigma(v)$ (vcm$^2$)')
 
     if save_files:
+        eVs = np.linspace(0, 300, 3000)
+        np.savetxt('sigma_e_gas.txt', sigma_e_func(eVs), newline=',')
+        np.savetxt('sigma_p_gas.txt', sigma_p_func(eVs), newline=',')
+        np.savetxt('K_max_gas.txt', (sigma_e_func(eVs) + sigma_p_func(eVs) + sigma_i_func(eVs)) * E_to_v(eVs) * 1e2, newline=',')
         np.savetxt('sigma_i.txt', y_vals1, newline=',')
         np.savetxt('sigma_e.txt', y_vals2, newline=',')
         np.savetxt('sigma_p.txt', y_vals3, newline=',')
         np.savetxt('k_max.txt', y_tots, newline=',')
 
-    plt.yscale('log')
-    plt.xscale('log')
+    if plot_data or plot_probabilities:
+        plt.yscale('log')
+        plt.xscale('log')
 
-    plt.xlabel('eV')
+        plt.xlabel('eV')
 
-    plt.legend()
-    plt.grid()
-    plt.show()
+        plt.legend()
+        plt.grid()
+        plt.show()

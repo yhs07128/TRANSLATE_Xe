@@ -1,5 +1,6 @@
 import sys
 import getopt
+import scipy.interpolate as interpolate
 from math import sqrt
 import matplotlib.pyplot as plt
 import csv
@@ -11,6 +12,14 @@ T = 87
 n = 2.11e22
 
 plot_mobility = False
+plot_ionizations = False
+
+def phi(n, x, y, z):
+    x_length = max(x) - min(x)
+    y_length = max(y) - min(y)
+    z_length = max(z) - min(z)
+    volume = x_length * y_length * z_length
+    return  volume / n
 
 def mobility(E):
     a0 = 551.6
@@ -60,6 +69,18 @@ class Graph:
                 self.ionized.append(_ionized)
                 self.n += 1
 
+    def ionizations_over_time(self):
+        i_over_t = 0
+        for i in range(self.n):
+            if self.ionized[i][-1] == 0:
+                continue
+            else:
+                t0 = self.t[i][np.where(self.ionized[i] == 0)[0][-1]]
+                tf = self.t[i][-1]
+                i_over_t += self.ionized[i][-1] / (tf - t0)
+        i_over_t /= self.n
+        return i_over_t
+
     def drift_mean(self):
         mean = 0
         for i in range(self.n):
@@ -107,10 +128,12 @@ class Graph:
 
 if __name__ == '__main__':
     file_list = sorted(glob.glob('sim_data/*.txt'))
-    opts, args = getopt.getopt(sys.argv[1:], "mg:v")
+    opts, args = getopt.getopt(sys.argv[1:], "img:v")
     file_name = None
 
     for o, a in opts:
+        if o == '-i':
+            plot_ionizations = True
         if o == '-m':
             plot_mobility = True
         if o == '-g':
@@ -148,22 +171,41 @@ if __name__ == '__main__':
         volts_1d = []
         means_1d = []
         std_devs_1d = []
+        ionizations_1d = []
 
         for key, value in sorted(files_1d.items()):
             graph = Graph(value)
             volts_1d.append(key)
             means_1d.append(graph.drift_mean())
             std_devs_1d.append(graph.drift_std_dev())
+            ionizations_1d.append(graph.ionizations_over_time())
 
         volts_3d = []
         means_3d = []
         std_devs_3d = []
+        ionizations_3d = []
 
         for key, value in sorted(files_3d.items()):
             graph = Graph(value)
             volts_3d.append(key)
             means_3d.append(graph.drift_mean())
             std_devs_3d.append(graph.drift_std_dev())
+            ionizations_3d.append(graph.ionizations_over_time())
+
+        if plot_ionizations:
+            plt.figure()
+
+            plt.plot(volts_1d, ionizations_1d, label='1D')
+            plt.plot(volts_3d, ionizations_3d, label='3D')
+
+            plt.xlabel('V/cm')
+            plt.ylabel('Average ionizations per unit time')
+
+            plt.xscale('log')
+
+            plt.grid()
+            plt.legend()
+            plt.title('Ionization Events')
 
         if plot_mobility is True:
             means_1d = [means_1d[i] * (n / float(volts_1d[i])) * 1e2 for i in range(len(means_1d))]
@@ -179,6 +221,8 @@ if __name__ == '__main__':
 
             a = [1.4e-21, 2.8e-21, 6.2e-21, 1.2e-20, 2.5e-20, 5.1e-20, 1e-19, 2.2e-19, 4.6e-19, 1e-18]
             b = [9e24, 10e24, 10e24, 9e24, 6e24, 4.4e24, 3e24, 2e24, 1e24, 7e23]
+
+            plt.figure()
 
             plt.plot(x, y, label='Data from [1]')
             plt.plot(a, b, label='Data from [2]')
@@ -198,6 +242,8 @@ if __name__ == '__main__':
         else:
             x = np.logspace(1, np.log10(2e4), 15)
             y = mobility(x * 1e-3) * x * 1e-2
+
+            plt.figure()
 
             plt.plot(x, y, label='Data from [1]')
 
