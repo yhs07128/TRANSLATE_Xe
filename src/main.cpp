@@ -31,8 +31,8 @@ int main()
     }
 
     std::string line;
-    int volts;
-    std::vector<int> volts_list;
+    double volts;
+    std::vector<double> volts_list;
 
     std::cout << "V/cm (multiple values separated by spaces): ";
     std::cin.ignore();
@@ -71,8 +71,6 @@ int main()
         std::cin >> batches;
     }
 
-    int ions = 0;
-
     for (int j = 0; j < volts_list.size(); j++)
     {
         for (int i = 0; i < batches; i++)
@@ -88,6 +86,8 @@ int main()
 
             std::ofstream file(name);
 
+            int ions = 0;
+            
             if (dimensions == 1)
             {
                 Electron<double> elec(ions, volts_list[j], generator, std_gauss, argon_dist, elec_dist);

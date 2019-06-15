@@ -90,6 +90,8 @@ public:
         if (rand < ion_prob)
         {
             ionization_electrons.push_back(new Electron<T>(ionized, volts_per_cm, generator, std_gauss, argon_dist, elec_dist));
+            double v_length = abs(v);
+            v = ((v_length - 2355743) / v_length) * v; // Only considers the first ionization energy value of Ar, 15.76 eV
             ionized++;
         }
         else if (rand < (ion_prob + col_prob))
