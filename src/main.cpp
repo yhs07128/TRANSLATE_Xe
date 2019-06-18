@@ -77,12 +77,12 @@ int main()
         {
             std::cout << "Writing " << int(volts_list[j]) << "V file " << i + 1 << " " << std::flush;
 
-            std::string name = "sim_data/";
+            std::string name = "../py/simulation-runs/";
             
             if (dimensions == 1)
-                name += "1D - " + std::to_string(int(volts_list[j])) + "V - " + std::to_string(i + 1) + ".txt";
+                name += "1d/" + std::to_string(int(volts_list[j])) + "V - " + std::to_string(i + 1) + ".txt";
             else if (dimensions == 3)
-                name += "3D - " + std::to_string(int(volts_list[j])) + "V - " + std::to_string(i + 1) + ".txt";
+                name += "3d/" + std::to_string(int(volts_list[j])) + "V - " + std::to_string(i + 1) + ".txt";
 
             std::ofstream file(name);
 

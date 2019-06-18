@@ -2,6 +2,7 @@
 #define ELECTRON_H
 
 #include <random>
+#include <algorithm>
 #include <array>
 #include <vector>
 #include <assert.h>
@@ -44,14 +45,23 @@ public:
         return round(log10(E) * 182.395086 + 547.185258);
     }
 
-    inline double cross_section_e(int i) const { return sigma_e_gas[i]; }
-    inline double cross_section_p(int i) const { return sigma_p_gas[i]; }
+    inline double cross_section_e(int i) const { return sigma_e[i]; }
+    inline double cross_section_p(int i) const { return sigma_p[i]; }
+    inline double cross_section_ex(int i) const { return sigma_excite[i]; }
     inline double cross_section_i(int i) const { return sigma_i[i]; }
 
     double collision_probability(double u, int i) const
     {
         assert(i < 1000);
-        double prob = (u * 1e2 * cross_section_e(i)) / K_max_gas[i];
+        double prob = (u * 1e2 * std::max(cross_section_e(i), cross_section_p(i))) / K_max[i];
+        assert(prob < 1);
+        return prob;
+    }
+
+    double excitation_probability(double u, int i) const
+    {
+        assert(i < 1000);
+        double prob = (u * 1e2 * cross_section_ex(i)) / K_max[i];
         assert(prob < 1);
         return prob;
     }
@@ -59,21 +69,21 @@ public:
     double ionization_probability(double u, int i) const
     {
         assert(i < 1000);
-        double prob = (u * 1e2 * cross_section_i(i)) / K_max_gas[i];
+        double prob = (u * 1e2 * cross_section_i(i)) / K_max[i];
         assert(prob < 1);
         return prob;
     }
 
     double next_collision(int i)
     {
-        double lambda = n * K_max_gas[i];
+        double lambda = n * K_max_;
         double beta = 1 / lambda;
 
         std::exponential_distribution<double> exponential(lambda);
         double time_step = exponential(generator);
 
-        if (time_step > 1e-14)
-            time_step = 1e-14;
+        if (time_step > 3 * beta)
+            time_step = 3 * beta;
 
         return time_step;
     }
@@ -87,6 +97,7 @@ public:
 
         x += v * time_to_collision;
         v += accel * time_to_collision;
+        
         energy = 0.5 * m_e * v * v * 6.242e18;
 
         T vm = random_velocity<T>(argon_dist, generator);
@@ -97,6 +108,7 @@ public:
         
         double ion_prob = ionization_probability(u, xsec_index);
         double col_prob = collision_probability(u, xsec_index);
+        double e_prob = excitation_probability(u, xsec_index);
 
         double rand = drand48();
 
@@ -105,13 +117,33 @@ public:
             // Enable if an exact simulation is needed. Otherwise, the number of free electrons (with no quenching) may be approximated by 2^N, where N is this.ionized
             // ionization_electrons.push_back(new Electron<T>(ionized, volts_per_cm, generator, std_gauss, argon_dist, elec_dist));
 
-            double v_length = abs(v);
-            v = ((v_length - 2355743) / v_length) * v; // Only considers the first ionization energy value of Ar, 15.76 eV
-            
-            energy = 0.5 * m_e * v * v * 6.242e18;
+            // v = random_velocity<T>(elec_dist, generator);
+
+            energy -= 15.76;
+            if (energy < 0)
+            {
+                energy = 0;
+                v = 0;
+            }
+            else
+                v = sqrt((2 * energy) / (m_e * 6.242e18)) * (v / abs(v));
+
             ionized++;
         }
-        else if (rand < (ion_prob + col_prob))
+        else if (rand < (ion_prob + e_prob))
+        {
+            // v = random_velocity<T>(elec_dist, generator);
+
+            energy -= 13.62;
+            if (energy < 0)
+            {
+                energy = 0;
+                v = 0;
+            }
+            else
+                v = sqrt((2 * energy) / (m_e * 6.242e18)) * (v / abs(v));
+        }
+        else if (rand < (ion_prob + e_prob + col_prob))
         {
             T n = random_unit_vector<T>(std_gauss, generator);
 
@@ -121,16 +153,15 @@ public:
 
             T v1 = (a + b + c) / (m_e + M_a);
 
-            double r = cross_section_p(xsec_index) / cross_section_e(xsec_index);
+            double r = cross_section_p(xsec_index) / std::max(cross_section_e(xsec_index), cross_section_p(xsec_index));
 
             if (drand48() < r)
                 v = v1;
             else
                 v = abs(v1) / abs(v) * v;
-
-            energy = 0.5 * m_e * v * v * 6.242e18;
         }
         
+        energy = 0.5 * m_e * v * v * 6.242e18;
         total_time += time_to_collision;
     }
 };
@@ -138,7 +169,7 @@ public:
 template<typename T>
 void print_data_line(Electron<T> &elec, std::ofstream &file)
 {
-    file << elec.total_time * 1e9 << "," << elec.x * 1e6 << "," << elec.energy << "," << (elec.x / elec.total_time) << "," << elec.ionized << "\n";
+    file << elec.total_time * 1e9 << "," << elec.x * 1e6 << "," << 0 << "," << 0 << "," << elec.energy << "," << (elec.x / elec.total_time) << "," << elec.ionized << "\n";
     return;
 }
 
