@@ -39,31 +39,43 @@ public:
     int index(double v) const
     {
         double E = 0.5 * m_e * v * v * 6.242e18;
-        return ceil(E * 10) - 1;
+        if (E < 1e-3)
+            E = 1e-3;
+        return round(log10(E) * 182.395086 + 547.185258);
     }
 
-    inline double cross_section_e(int i) const { return sigma_e[i]; }
-    inline double cross_section_p(int i) const { return sigma_p[i]; }
+    inline double cross_section_e(int i) const { return sigma_e_gas[i]; }
+    inline double cross_section_p(int i) const { return sigma_p_gas[i]; }
     inline double cross_section_i(int i) const { return sigma_i[i]; }
 
     double collision_probability(double u, int i) const
     {
-        double prob = (u * 1e2 * cross_section_e(i)) / K_max[i];
+        assert(i < 1000);
+        double prob = (u * 1e2 * cross_section_e(i)) / K_max_gas[i];
         assert(prob < 1);
         return prob;
     }
 
     double ionization_probability(double u, int i) const
     {
-        double prob = (u * 1e2 * cross_section_i(i)) / K_max[i];
+        assert(i < 1000);
+        double prob = (u * 1e2 * cross_section_i(i)) / K_max_gas[i];
         assert(prob < 1);
         return prob;
     }
 
     double next_collision(int i)
     {
-        std::exponential_distribution<double> exponential(n * K_max[i]);
-        return exponential(generator);
+        double lambda = n * K_max_gas[i];
+        double beta = 1 / lambda;
+
+        std::exponential_distribution<double> exponential(lambda);
+        double time_step = exponential(generator);
+
+        if (time_step > 1e-14)
+            time_step = 1e-14;
+
+        return time_step;
     }
 
     void update()
@@ -75,6 +87,7 @@ public:
 
         x += v * time_to_collision;
         v += accel * time_to_collision;
+        energy = 0.5 * m_e * v * v * 6.242e18;
 
         T vm = random_velocity<T>(argon_dist, generator);
 
@@ -89,9 +102,13 @@ public:
 
         if (rand < ion_prob)
         {
-            ionization_electrons.push_back(new Electron<T>(ionized, volts_per_cm, generator, std_gauss, argon_dist, elec_dist));
+            // Enable if an exact simulation is needed. Otherwise, the number of free electrons (with no quenching) may be approximated by 2^N, where N is this.ionized
+            // ionization_electrons.push_back(new Electron<T>(ionized, volts_per_cm, generator, std_gauss, argon_dist, elec_dist));
+
             double v_length = abs(v);
             v = ((v_length - 2355743) / v_length) * v; // Only considers the first ionization energy value of Ar, 15.76 eV
+            
+            energy = 0.5 * m_e * v * v * 6.242e18;
             ionized++;
         }
         else if (rand < (ion_prob + col_prob))
@@ -110,9 +127,10 @@ public:
                 v = v1;
             else
                 v = abs(v1) / abs(v) * v;
+
+            energy = 0.5 * m_e * v * v * 6.242e18;
         }
         
-        energy = 0.5 * m_e * v * v * 6.242e18;
         total_time += time_to_collision;
     }
 };

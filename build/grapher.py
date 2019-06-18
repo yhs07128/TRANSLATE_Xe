@@ -1,15 +1,18 @@
 import sys
 import getopt
 import scipy.interpolate as interpolate
-from math import sqrt
+from math import sqrt, log
 import matplotlib.pyplot as plt
 import csv
 import numpy as np
 import glob
 import re
 
-T = 87
-n = 2.11e22
+# T = 87
+# n = 2.11e22
+
+T = 89
+n = 8.41e19
 
 plot_mobility = False
 plot_ionizations = False
@@ -68,6 +71,21 @@ class Graph:
                 self.drift.append(_drift)
                 self.ionized.append(_ionized)
                 self.n += 1
+
+    def multiplication_factor(self):
+        M = 0
+        for i in range(self.n):
+            M += self.ionized[i][-1] * log(2)
+            # M += (2**(self.ionized[i][-1] * 10 / self.x[i][-1])) # If using estimated number of ionization electrons
+            # M += (self.ionized[i][-1] + 1)**(10 / self.x[i][-1]) # If using actual number of ionization electrons
+        M /= self.n
+
+        delta_x = 0
+        for i in range(self.n):
+            delta_x += self.x[i][-1]
+        delta_x /= self.n
+
+        return M / (delta_x * 1e-4)
 
     def ionizations_over_time(self):
         i_over_t = 0
@@ -147,6 +165,8 @@ if __name__ == '__main__':
 
         graph = Graph(new_list)
 
+        print(graph.multiplication_factor())
+
         graph.plot_drift_velocity()
         graph.plot_energy()
 
@@ -178,7 +198,7 @@ if __name__ == '__main__':
             volts_1d.append(key)
             means_1d.append(graph.drift_mean())
             std_devs_1d.append(graph.drift_std_dev())
-            ionizations_1d.append(graph.ionizations_over_time())
+            ionizations_1d.append(graph.multiplication_factor())
 
         volts_3d = []
         means_3d = []
@@ -190,22 +210,29 @@ if __name__ == '__main__':
             volts_3d.append(key)
             means_3d.append(graph.drift_mean())
             std_devs_3d.append(graph.drift_std_dev())
-            ionizations_3d.append(graph.ionizations_over_time())
+            ionizations_3d.append(graph.multiplication_factor())
 
         if plot_ionizations:
             plt.figure()
 
-            plt.plot(volts_1d, ionizations_1d, label='1D')
-            plt.plot(volts_3d, ionizations_3d, label='3D')
+            x = np.logspace(np.log10(2), np.log10(2e3), 100)
+            y = 14 * np.exp(-180 / x)
 
-            plt.xlabel('V/cm')
-            plt.ylabel('Average ionizations per unit time')
+            plt.plot([j / 750 for j in volts_1d], ionizations_1d, label='1D')
+            plt.plot([j / 750 for j in volts_3d], ionizations_3d, label='3D')
+            plt.plot(x, y)
+
+            plt.xlabel('E/p')
+            plt.ylabel('')
+
+            plt.xlim(2e-1, 2e3)
+            plt.ylim(1e-4, 1e2)
 
             plt.xscale('log')
+            plt.yscale('log')
 
             plt.grid()
             plt.legend()
-            plt.title('Ionization Events')
 
         if plot_mobility is True:
             means_1d = [means_1d[i] * (n / float(volts_1d[i])) * 1e2 for i in range(len(means_1d))]

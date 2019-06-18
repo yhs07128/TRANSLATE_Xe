@@ -52,56 +52,66 @@ if __name__ == '__main__':
     S = np.array([0.048, 0.055, 0.125, 0.4, 1.115, 1.29, 1.16, 1.01])
     S_func = interpolate.interp1d(S_eVs, S, kind='quadratic', fill_value=(0.048, 1), bounds_error=False)
 
-    x = np.logspace(-3, np.log10(290), 3000)
+    eVs_log = np.logspace(-3, np.log10(290), 3000)
 
     if plot_data:
-        plt.plot(x, sigma_e_func(x), label=r'GAr $\sigma_E$')
-        plt.plot(x, sigma_p_func(x), label=r'GAr $\sigma_p$')
-        plt.plot(x, sigma_i_func(x), label=r'GAr $\sigma_I$')
-        plt.plot(x, np.full(len(x), 5.5e-16), label=r'LAr $\sigma_E$')      # Low velocity energy cross section
-        plt.plot(x, S_func(x) * 5.5e-16, label=r'LAr $\sigma_p$')           # Low velocity momentum cross section
+        plt.plot(eVs_log, sigma_e_func(eVs_log), label=r'GAr $\sigma_E$')
+        plt.plot(eVs_log, sigma_p_func(eVs_log), label=r'GAr $\sigma_p$')
+        plt.plot(eVs_log, sigma_i_func(eVs_log), label=r'GAr $\sigma_I$')
+        plt.plot(eVs_log, np.full(len(eVs_log), 5.5e-16), label=r'LAr $\sigma_E$')      # Low velocity energy cross section
+        plt.plot(eVs_log, S_func(eVs_log) * 5.5e-16, label=r'LAr $\sigma_p$')           # Low velocity momentum cross section
 
         plt.ylabel(r'$\sigma$ (cm$^2$)')
 
-    sigma_i_final = sigma_i_func(x)
+    sigma_i_final = sigma_i_func(eVs_log)
     sigma_e_final = np.array([])
     sigma_p_final = np.array([])
     sigma_sum = np.array([])
 
-    for i in x:
+    for i in eVs_log:
         sigma_e_final = np.append(sigma_e_final, liquid_sigma_e(i, sigma_e_func)) # cm^3 / s
 
-    for i in x:
+    for i in eVs_log:
         sigma_p_final = np.append(sigma_p_final, liquid_sigma_p(i, S_func, sigma_p_func)) # cm^3 / s
 
     sigma_sum = sigma_i_final + sigma_e_final + sigma_p_final # cm^3 / s
 
     if plot_probabilities:
-        plt.plot(x, sigma_i_final * E_to_v(x) * 1e2, label=r'$v\sigma_I(v)$')
-        plt.plot(x, sigma_e_final * E_to_v(x) * 1e2, label=r'$v\sigma_E(v)$')
-        plt.plot(x, sigma_p_final * E_to_v(x) * 1e2, label=r'$v\sigma_p(v)$')
-        plt.plot(x, sigma_sum * E_to_v(x) * 1e2 * 3, label=r'$v\sigma_{total}(v)$')
+        plt.plot(eVs_log, sigma_i_final * E_to_v(eVs_log) * 1e2, label=r'$v\sigma_I(v)$')
+        plt.plot(eVs_log, sigma_e_final * E_to_v(eVs_log) * 1e2, label=r'$v\sigma_E(v)$')
+        plt.plot(eVs_log, sigma_p_final * E_to_v(eVs_log) * 1e2, label=r'$v\sigma_p(v)$')
+        plt.plot(eVs_log, sigma_sum * E_to_v(eVs_log) * 1e2 * 3, label=r'$v\sigma_{total}(v)$')
         plt.ylabel(r'$v\sigma(v)$ (vcm$^2$)')
 
     if save_files:
-        eVs = np.linspace(0, 300, 3000)
+        eVs = np.logspace(np.log10(1e-3), np.log10(299.99), 1000)
 
-        sigma_e_l = []
-        sigma_p_l = []
+        sigma_e_log = np.array([])
+        sigma_p_log = np.array([])
+        sigma_i_log = np.array([])
+        K_max_log = np.array([])
 
         for i in eVs:
-            sigma_e_l.append(liquid_sigma_e(i, sigma_e_func))
+            sigma_e_log = np.append(sigma_e_log, liquid_sigma_e(i, sigma_e_func))
+            sigma_p_log = np.append(sigma_p_log, liquid_sigma_p(i, S_func, sigma_p_func))
+            sigma_i_log = np.append(sigma_i_log, sigma_i_func(i))
+            K_max_log = np.append(K_max_log, (liquid_sigma_e(i, sigma_e_func) + liquid_sigma_p(i, S_func, sigma_p_func) + sigma_i_func(i)) * E_to_v(i) * 1e2 * 3)
 
-        for i in eVs:
-            sigma_p_l.append(liquid_sigma_p(i, S_func, sigma_p_func))
+        plt.plot(eVs, sigma_e_func(eVs) * E_to_v(eVs) * 1e2)
+        plt.plot(eVs, sigma_p_func(eVs) * E_to_v(eVs) * 1e2)
+        plt.plot(eVs, sigma_i_func(eVs) * E_to_v(eVs) * 1e2)
+        plt.plot(eVs, (sigma_e_func(eVs) + sigma_p_func(eVs) + sigma_i_log) * E_to_v(eVs) * 1e2 * 10)
+        plt.xscale('log')
+        plt.yscale('log')
+        plt.show()
 
         np.savetxt('sigma_e_gas.txt', sigma_e_func(eVs), newline=',')
         np.savetxt('sigma_p_gas.txt', sigma_p_func(eVs), newline=',')
-        np.savetxt('K_max_gas.txt', (sigma_e_func(eVs) + sigma_p_func(eVs) + sigma_i_func(eVs)) * E_to_v(eVs) * 1e2, newline=',')
-        np.savetxt('sigma_i.txt', sigma_i_func(eVs), newline=',')
-        np.savetxt('sigma_e.txt', sigma_e_l, newline=',')
-        np.savetxt('sigma_p.txt', sigma_p_l, newline=',')
-        np.savetxt('k_max.txt', sigma_sum * E_to_v(eVs) * 1e2 * 3, newline=',')
+        np.savetxt('K_max_gas.txt', (sigma_e_func(eVs) + sigma_p_func(eVs) + sigma_i_log) * E_to_v(eVs) * 1e2 * 3, newline=',')
+        np.savetxt('sigma_e.txt', sigma_e_log, newline=',')
+        np.savetxt('sigma_p.txt', sigma_p_log, newline=',')
+        np.savetxt('sigma_i.txt', sigma_i_log, newline=',')
+        np.savetxt('k_max.txt', K_max_log, newline=',')
 
     if plot_data or plot_probabilities:
         plt.yscale('log')
