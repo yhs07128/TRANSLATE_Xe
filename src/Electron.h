@@ -5,17 +5,18 @@
 #include <algorithm>
 #include <array>
 #include <vector>
+#include <chrono>
 #include <assert.h>
 
 #include "Constants.h"
 #include "Utils.h"
 #include "Vec.h"
 
-template<typename T>
+template<typename S>
 class Electron
 {
 public:
-    T x, v, accel;
+    S x, v, accel;
 
     double volts_per_cm;
     double time_to_collision;
@@ -23,67 +24,88 @@ public:
 
     double energy;
     int& ionized;
-    std::vector<Electron<T>*> ionization_electrons;
+    int child_ions;
+
+    std::vector<Electron<S>*> ionization_electrons;
 
     std::mt19937 &generator;
-    std::normal_distribution<double> &std_gauss;
-    std::normal_distribution<double> &argon_dist;
-    std::normal_distribution<double> &elec_dist;
 
-    Electron(int &ions, double volts, std::mt19937 &gen, std::normal_distribution<double> &std, std::normal_distribution<double> &arg, std::normal_distribution<double> &elec):
-        ionized(ions), x(0), v(random_velocity<T>(arg, gen)), accel((e / m_e) * volts * 1e2), volts_per_cm(volts), total_time(0),
-        generator(gen), std_gauss(std), argon_dist(arg), elec_dist(elec)
-    {
-        energy = 0.5 * m_e * v * v * 6.242e18;
-    }
+    Electron(int &ions, double volts, std::mt19937 &gen):
+        ionized(ions), child_ions(0), x(0), v(random_velocity<S>(gen, true)), accel((e / m_e) * volts * 1e2), volts_per_cm(volts), total_time(0), generator(gen)
+    { energy = J_to_eV(0.5 * m_e * v * v); }
 
     int index(double v) const
     {
-        double E = 0.5 * m_e * v * v * 6.242e18;
+        double E = J_to_eV(0.5 * m_e * v * v);
+
         if (E < 1e-3)
             E = 1e-3;
-        return round(log10(E) * 182.395086 + 547.185258);
+
+        int ind = round(167.12 * log10(E) + 501.36);
+        assert(ind < 1000);
+
+        return ind;
     }
 
-    inline double cross_section_e(int i) const { return sigma_e[i]; }
-    inline double cross_section_p(int i) const { return sigma_p[i]; }
-    inline double cross_section_ex(int i) const { return sigma_excite[i]; }
-    inline double cross_section_i(int i) const { return sigma_i[i]; }
+    inline double x_sec_e(double v) const { return (is_gas) ? momentum_xsec_gas[index(v)] : effective_xsec_liquid[index(v)]; }
 
-    double collision_probability(double u, int i) const
+    inline double x_sec_p(double v) const { return (is_gas) ? momentum_xsec_gas[index(v)] : momentum_xsec_liquid[index(v)]; }
+
+    inline double x_sec_i(double v) const { return ionization_xsec[index(v)]; }
+
+    inline double x_sec_ex(double v, int level) const
     {
-        assert(i < 1000);
-        double prob = (u * 1e2 * std::max(cross_section_e(i), cross_section_p(i))) / K_max[i];
-        assert(prob < 1);
+        switch (level)
+        {
+            case 11:
+                return excite_xsec_11[index(v)];
+            case 13:
+                return excite_xsec_13[index(v)];
+            case 14:
+                return excite_xsec_14[index(v)];
+            case 15:
+                return excite_xsec_15[index(v)];
+            default:
+                assert(false);
+        }
+    }
+
+    void remove_energy(double eV)
+    {
+        energy -= eV / energy_transfer_efficiency;
+        std::uniform_real_distribution<double> dist(0.0, 1.0);
+
+        if (energy > 12)
+            energy = dist(generator) * 12;
+
+        if (energy < 0)
+            energy = 0;
+        
+        v = sqrt((2 * eV_to_J(energy)) / m_e) * (v / abs(v));
+    }
+
+    double K_max(double u)
+    {
+        if (use_const_kmax)
+            return K_max_;
+
+        return (is_gas) ? K_max_gas[index(u)] : K_max_liquid[index(u)];
+    }
+
+    double probability(double u, double x_sec)
+    {
+        double prob = (u * 1e2 * x_sec) / K_max(u);
+        assert (prob < 1);
         return prob;
     }
 
-    double excitation_probability(double u, int i) const
+    double next_collision(double u)
     {
-        assert(i < 1000);
-        double prob = (u * 1e2 * cross_section_ex(i)) / K_max[i];
-        assert(prob < 1);
-        return prob;
-    }
-
-    double ionization_probability(double u, int i) const
-    {
-        assert(i < 1000);
-        double prob = (u * 1e2 * cross_section_i(i)) / K_max[i];
-        assert(prob < 1);
-        return prob;
-    }
-
-    double next_collision(int i)
-    {
-        double lambda = n * K_max_;
+        double lambda = n * K_max(u);
         double beta = 1 / lambda;
 
         std::exponential_distribution<double> exponential(lambda);
         double time_step = exponential(generator);
-
-        if (time_step > 3 * beta)
-            time_step = 3 * beta;
 
         return time_step;
     }
@@ -93,75 +115,73 @@ public:
         for (auto elec : ionization_electrons)
             elec->update();
 
-        time_to_collision = next_collision(index(abs(v)));
+        time_to_collision = next_collision(abs(v));
 
-        x += v * time_to_collision;
+        x += v * time_to_collision + 0.5 * accel * time_to_collision * time_to_collision;
         v += accel * time_to_collision;
         
-        energy = 0.5 * m_e * v * v * 6.242e18;
+        energy = J_to_eV(0.5 * m_e * v * v);
 
-        T vm = random_velocity<T>(argon_dist, generator);
+        S vm = random_velocity<S>(generator);
 
         double u = abs(v - vm);
-
-        int xsec_index = index(u);
         
-        double ion_prob = ionization_probability(u, xsec_index);
-        double col_prob = collision_probability(u, xsec_index);
-        double e_prob = excitation_probability(u, xsec_index);
+        double col_prob = probability(u, x_sec_e(u));
+        double ion_prob = probability(u, x_sec_i(u));
+        
+        double ex_11_prob = probability(u, x_sec_ex(u, 11));
+        double ex_13_prob = probability(u, x_sec_ex(u, 13));
+        double ex_14_prob = probability(u, x_sec_ex(u, 14));
+        double ex_15_prob = probability(u, x_sec_ex(u, 15));
 
-        double rand = drand48();
+        std::uniform_real_distribution<double> dist(0.0, 1.0);
+        double rand = dist(generator);
 
         if (rand < ion_prob)
         {
-            // Enable if an exact simulation is needed. Otherwise, the number of free electrons (with no quenching) may be approximated by 2^N, where N is this.ionized
-            // ionization_electrons.push_back(new Electron<T>(ionized, volts_per_cm, generator, std_gauss, argon_dist, elec_dist));
+            if (recursive)
+               ionization_electrons.push_back(new Electron<S>(ionized, volts_per_cm, generator));
 
-            // v = random_velocity<T>(elec_dist, generator);
-
-            energy -= 15.76;
-            if (energy < 0)
-            {
-                energy = 0;
-                v = 0;
-            }
-            else
-                v = sqrt((2 * energy) / (m_e * 6.242e18)) * (v / abs(v));
+            remove_energy(15.76);
 
             ionized++;
+            child_ions++;
         }
-        else if (rand < (ion_prob + e_prob))
+        else if (rand < (ion_prob + ex_11_prob))
         {
-            // v = random_velocity<T>(elec_dist, generator);
-
-            energy -= 13.62;
-            if (energy < 0)
-            {
-                energy = 0;
-                v = 0;
-            }
-            else
-                v = sqrt((2 * energy) / (m_e * 6.242e18)) * (v / abs(v));
+            remove_energy(11.68);
         }
-        else if (rand < (ion_prob + e_prob + col_prob))
+        else if (rand < (ion_prob + ex_11_prob + ex_13_prob))
         {
-            T n = random_unit_vector<T>(std_gauss, generator);
+            remove_energy(13.21);
+        }
+        else if (rand < (ion_prob + ex_11_prob + ex_13_prob + ex_14_prob))
+        {
+            remove_energy(14.10);
+        }
+        else if (rand < (ion_prob + ex_11_prob + ex_13_prob + ex_14_prob + ex_15_prob))
+        {
+            remove_energy(15.23);
+        }
+        else if (rand < (ion_prob + ex_11_prob + ex_13_prob + ex_14_prob + ex_15_prob + col_prob))
+        {
+            S n = random_unit_vector<S>(generator);
 
-            T a = (M_a * u) * n;
-            T b = (m_e) * v;
-            T c = (M_a) * vm;
+            S a = (M_a * u) * n;
+            S b = (m_e) * v;
+            S c = (M_a) * vm;
 
-            T v1 = (a + b + c) / (m_e + M_a);
+            S v1 = (a + b + c) / (m_e + M_a);
 
-            double r = cross_section_p(xsec_index) / std::max(cross_section_e(xsec_index), cross_section_p(xsec_index));
+            double r = x_sec_p(u) / std::max(x_sec_e(u), x_sec_p(u));
 
-            if (drand48() < r)
+            if (dist(generator) < r)
                 v = v1;
             else
                 v = abs(v1) / abs(v) * v;
         }
         
-        energy = 0.5 * m_e * v * v * 6.242e18;
+        energy = J_to_eV(0.5 * m_e * v * v);
         total_time += time_to_collision;
     }
 };
@@ -181,11 +201,15 @@ void print_data_line<Vec>(Electron<Vec> &elec, std::ofstream &file)
 }
 
 template<typename T>
-void generate_plot(Electron<T> &elec, double cutoff, std::ofstream &file, int write_every)
+void generate_plot(int volts, double cutoff, int number, int write_every)
 {
-    int simulation_step = 1;
+    int ions = 0;
+    std::mt19937 generator(std::chrono::system_clock::now().time_since_epoch().count());
+    Electron<T> elec(ions, volts, generator);
+    std::ofstream file("../py/simulation-runs/1d/" + std::to_string(volts) + "V - " + std::to_string(number) + ".txt");
     
-    const int total_progress_steps = 10;
+    int simulation_step = 1;
+    const int total_progress_steps = 5;
     std::array<bool, total_progress_steps> progress;
     progress.fill(false);
     int progress_count = 1;
@@ -208,6 +232,46 @@ void generate_plot(Electron<T> &elec, double cutoff, std::ofstream &file, int wr
 
     elec.update();
     print_data_line<T>(elec, file);
+
+    file.close();
+
+    return;
+}
+
+template<>
+void generate_plot<Vec>(int volts, double cutoff, int number, int write_every)
+{
+    int ions = 0;
+    std::mt19937 generator(std::chrono::system_clock::now().time_since_epoch().count());
+    Electron<Vec> elec(ions, volts, generator);
+    std::ofstream file("../py/simulation-runs/3d/" + std::to_string(volts) + "V - " + std::to_string(number) + ".txt");
+    
+    int simulation_step = 1;
+    const int total_progress_steps = 5;
+    std::array<bool, total_progress_steps> progress;
+    progress.fill(false);
+    int progress_count = 1;
+
+    while (elec.total_time < cutoff)
+    {
+        elec.update();
+
+        if (((elec.total_time / cutoff) > (float(progress_count) / total_progress_steps)) && progress[(progress_count++ - 1)] == false)
+        {
+            progress[progress_count - 2] = true;
+            std::cout << "." << std::flush;
+        }
+
+        if (simulation_step++ % write_every != 0)
+            continue;
+        
+        print_data_line<Vec>(elec, file);
+    }
+
+    elec.update();
+    print_data_line<Vec>(elec, file);
+
+    file.close();
 
     return;
 }

@@ -2,7 +2,6 @@
 #define Vec_H
 
 #include <iostream>
-#include <fstream>
 
 class Vec
 {

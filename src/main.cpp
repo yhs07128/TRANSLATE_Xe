@@ -9,17 +9,13 @@
 #include <sys/stat.h>
 #include <string>
 #include <chrono>
+#include <thread>
 
 #include "Vec.h"
 #include "Electron.h"
 
 int main()
 {
-    std::mt19937 generator(std::chrono::system_clock::now().time_since_epoch().count());
-    std::normal_distribution<double> std_gauss(0.0, 1.0);
-    std::normal_distribution<double> argon_dist(0.0, sqrt((k_b * T) / (2 * M_a)));
-    std::normal_distribution<double> elec_dist(0.0, sqrt((k_b * T) / (2 * m_e)));
-
     int dimensions;
     std::cout << "1D or 3D: ";
     std::cin >> dimensions;
@@ -61,8 +57,11 @@ int main()
         std::cin >> write_every;
     }
 
+    int cores = std::thread::hardware_concurrency();
+    if (cores < 1) cores = 1;
+
     int batches;
-    std::cout << "Repeat: ";
+    std::cout << "Batches (in groups of " + std::to_string(cores) + "): ";
     std::cin >> batches;
     while (std::cin.fail())
     {
@@ -75,31 +74,18 @@ int main()
     {
         for (int i = 0; i < batches; i++)
         {
-            std::cout << "Writing " << int(volts_list[j]) << "V file " << i + 1 << " " << std::flush;
+            std::cout << "Writing " << int(volts_list[j]) << "V file group " << i + 1 << " " << std::flush;
+            std::thread branches[cores];
 
-            std::string name = "../py/simulation-runs/";
-            
-            if (dimensions == 1)
-                name += "1d/" + std::to_string(int(volts_list[j])) + "V - " + std::to_string(i + 1) + ".txt";
-            else if (dimensions == 3)
-                name += "3d/" + std::to_string(int(volts_list[j])) + "V - " + std::to_string(i + 1) + ".txt";
-
-            std::ofstream file(name);
-
-            int ions = 0;
-            
-            if (dimensions == 1)
+            for (int k = 0; k < cores; k++)
             {
-                Electron<double> elec(ions, volts_list[j], generator, std_gauss, argon_dist, elec_dist);
-                generate_plot<double>(elec, cutoff, file, write_every);
+                if (dimensions == 1)
+                    branches[k] = std::thread(generate_plot<double>, int(volts_list[j]), cutoff, 4 * i + (k + 1), write_every);
+                else
+                    branches[k] = std::thread(generate_plot<Vec>, int(volts_list[j]), cutoff, 4 * i + (k + 1), write_every);   
             }
-            else if (dimensions == 3)
-            {
-                Electron<Vec> elec(ions, volts_list[j], generator, std_gauss, argon_dist, elec_dist);
-                generate_plot<Vec>(elec, cutoff, file, write_every);
-            }
-
-            file.close();
+            for (int k = 0; k < cores; k++)
+                    branches[k].join();
 
             std::cout << "\n";
         }
