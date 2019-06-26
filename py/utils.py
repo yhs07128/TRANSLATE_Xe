@@ -13,10 +13,6 @@ class Graph:
         self.n = 0
         self.tail_percent = 0.05
 
-        self.x_bounds = [np.inf, -np.inf]
-        self.y_bounds = [np.inf, -np.inf]
-        self.z_bounds = [np.inf, -np.inf]
-
         self.t_end_avg = 0
         
         self.t = []
@@ -37,58 +33,9 @@ class Graph:
             self.drift.append(_drift)
             self.ionized.append(_ionized)
             self.n += 1
-
-            min_x = np.amin(_x)
-            max_x = np.amax(_x)
-
-            if min_x < self.x_bounds[0]:
-                self.x_bounds[0] = min_x
-            if max_x > self.x_bounds[1]:
-                self.x_bounds[1] = max_x
-
-            min_y = np.amin(_y)
-            max_y = np.amax(_y)
-
-            if min_y < self.y_bounds[0]:
-                self.y_bounds[0] = min_y
-            if max_y > self.y_bounds[1]:
-                self.y_bounds[1] = max_y
-
-            min_z = np.amin(_z)
-            max_z = np.amax(_z)
-
-            if min_z < self.z_bounds[0]:
-                self.z_bounds[0] = min_z
-            if max_z > self.z_bounds[1]:
-                self.z_bounds[1] = max_z
-
             self.t_end_avg += _t[-1]
         
         self.t_end_avg /= self.n
-
-    def area_xy(self):
-        x_width = self.x_bounds[1] - self.x_bounds[0] * 1e-6
-        y_width = self.y_bounds[1] - self.y_bounds[0] * 1e-6
-        return x_width * y_width
-
-    def area_xz(self):
-        x_width = self.x_bounds[1] - self.x_bounds[0] * 1e-6
-        z_width = self.z_bounds[1] - self.z_bounds[0] * 1e-6
-        return x_width * z_width
-
-    def area_yz(self):
-        y_width = self.y_bounds[1] - self.y_bounds[0] * 1e-6
-        z_width = self.z_bounds[1] - self.z_bounds[0] * 1e-6
-        return y_width * z_width
-
-    def diff_xy(self):
-        return self.area_xy() / self.t_end_avg
-
-    def diff_xz(self):
-        return self.area_xz() / self.t_end_avg
-
-    def diff_yz(self):
-        return self.area_yz() / self.t_end_avg
 
     def M(self, recursive=False):
         M_over_d = 0
@@ -107,7 +54,7 @@ class Graph:
         if not recursive:
             M_over_d = 2**(N * (d / avg_dist))
         else:
-            M_over_d = N**(d / avg_dist)
+            M_over_d = (N + 1)**(d / avg_dist)
         
         return M_over_d
 
@@ -127,9 +74,54 @@ class Graph:
         if not recursive:
             alph = N * log(2) / (avg_dist * 1e-4)
         else:
-            alph += log(N) / (avg_dist * 1e-4)
+            alph += log(N + 1) / (avg_dist * 1e-4)
 
         return alph
+
+    def avg_x(self, k):
+        x = []
+        for i in range(self.n):
+            x.append(self.x[i][k])
+        return sum(x) / len(x)
+
+    def variance_x(self, k):
+        mean = self.avg_x(k)
+        variance = []
+        for i in range(self.n):
+            variance.append((self.x[i][k] - mean)**2)
+        return sum(variance) / (len(variance) - 1)
+
+    def avg_y(self, k):
+        y = []
+        for i in range(self.n):
+            y.append(self.y[i][k])
+        return sum(y) / len(y)
+
+    def variance_y(self, k):
+        mean = self.avg_y(k)
+        variance = []
+        for i in range(self.n):
+            variance.append((self.y[i][k] - mean)**2)
+        return sum(variance) / (len(variance) - 1)
+
+    def avg_z(self, k):
+        z = []
+        for i in range(self.n):
+            z.append(self.z[i][k])
+        return sum(z) / len(z)
+
+    def variance_z(self, k):
+        mean = self.avg_z(k)
+        variance = []
+        for i in range(self.n):
+            variance.append((self.z[i][k] - mean)**2)
+        return sum(variance) / (len(variance) - 1)
+
+    def avg_t(self, k):
+        t = []
+        for i in range(self.n):
+            t.append(self.t[i][k])
+        return sum(t) / len(t)
 
     def eV_mean(self):
         mean = 0
