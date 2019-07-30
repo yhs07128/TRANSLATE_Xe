@@ -1,5 +1,5 @@
-#ifndef Vec_H
-#define Vec_H
+#ifndef VEC_H
+#define VEC_H
 
 #include <iostream>
 
@@ -12,11 +12,19 @@ public:
     Vec(double a): x(a), y(0), z(0) { } // This odd constructor is specfically to deal with the x-axis acceleration on 3D simulations
     Vec(double _x, double _y, double _z): x(_x), y(_y), z(_z) { }
 
-    inline Vec& operator+=(const Vec &v)
+    inline Vec& operator+=(const Vec& v)
     {
         x += v.x;
         y += v.y;
         z += v.z;
+        return *this;
+    }
+
+    inline Vec& operator*=(const double s)
+    {
+        x *= s;
+        y *= s;
+        z *= s;
         return *this;
     }
 
@@ -30,37 +38,37 @@ public:
     }
 };
 
-inline double abs(const Vec &v)
+inline double norm(const Vec& v)
 {
     return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
-inline Vec operator+(const Vec &v, const Vec &w)
+inline Vec operator+(const Vec& v, const Vec& w)
 {
     return Vec(v.x + w.x, v.y + w.y, v.z + w.z);
 }
 
-inline Vec operator-(const Vec &v, const Vec &w)
+inline Vec operator-(const Vec& v, const Vec& w)
 {
     return Vec(v.x - w.x, v.y - w.y, v.z - w.z);
 }
 
-inline double operator*(const Vec &v, const Vec &w)
+inline double operator*(const Vec& v, const Vec& w)
 {
     return v.x * w.x + v.y * w.y + v.z * w.z;
 }
 
-inline Vec operator*(float s, const Vec &v)
+inline Vec operator*(float s, const Vec& v)
 {
     return Vec(s * v.x, s * v.y, s * v.z);
 }
 
-inline Vec operator*(const Vec &v, float s)
+inline Vec operator*(const Vec& v, float s)
 {
     return Vec(s * v.x, s * v.y, s * v.z);
 }
 
-inline Vec operator/(const Vec v, float s)
+inline Vec operator/(const Vec& v, float s)
 {
     return Vec(v.x / s, v.y / s, v.z / s);
 }
