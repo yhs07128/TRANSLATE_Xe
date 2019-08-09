@@ -14,7 +14,7 @@ Gas cross-section data is from the BSR database, www.lxcat.net, retrieved on Jun
 You'll need Numpy, Scipy, and Matplotlib. Jupyter is required to view the notebooks. CMake makes for an easy install.
 
 ### Installing
-The usual. Navigate to the project directory in terminal, then type
+Navigate to the project directory in terminal, then type
 
 ```
 mkdir build
