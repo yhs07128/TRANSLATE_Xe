@@ -19,39 +19,8 @@ inline double J_to_eV(double J)
 
 inline double eV_to_v(double eV)
 {
-    double J = J_to_eV(eV);
+    double J = eV_to_J(eV);
     return sqrt(2 * J / m_e);
-}
-
-double maxwell(std::mt19937& gen, bool electron)
-{
-    std::normal_distribution<double> dist;
-
-    if (electron)
-        dist = std::normal_distribution<double>(0.0, sqrt((k_b * T) / (2 * m_e)));
-    else
-        dist = std::normal_distribution<double>(0.0, sqrt((k_b * T) / (2 * M_a)));
-
-    double s1 = dist(gen);
-    double s2 = dist(gen);
-    double s3 = dist(gen);
-
-    double speed = sqrt(s1 * s1 + s2 * s2 + s3 * s3);
-
-    std::uniform_real_distribution<double> uniform(0.0, 1.0);
-
-    if (uniform(gen) < 0.5)
-        return -speed;
-    return speed;
-}
-
-Vec random_velocity(std::mt19937& gen, bool electron=false)
-{
-    if (!interactions)
-        return Vec(0, 0, 0);
-
-    Vec v(maxwell(gen, electron), maxwell(gen, electron), maxwell(gen, electron));
-    return v;
 }
 
 Vec random_unit_vector(std::mt19937& gen)
@@ -62,6 +31,24 @@ Vec random_unit_vector(std::mt19937& gen)
 
     if (norm(v) != 0)
         v /= norm(v);
+
+    return v;
+}
+
+Vec random_velocity(std::mt19937& gen, bool electron=false)
+{
+    if (!interactions)
+        return Vec(0, 0, 0);
+
+    double a;
+
+    if (!electron)
+        a = sqrt(k_b * T / M_a);
+    else
+        a = sqrt(k_b * T / m_e);
+
+    std::gamma_distribution<double> maxwell(1.5, 1 / (2 * a * a));
+    Vec v = random_unit_vector(gen) * sqrt(maxwell(gen));
 
     return v;
 }
@@ -152,8 +139,8 @@ bool hit_check(Vec pos)
             if ( ((z_val - top_z) * (z_val - top_z) + r_val * r_val <= top_radius * top_radius) || (z_val <= top_z && r_val <= top_radius) )
                 return true;
         } else {
-            if (z_val < 3e-3) {
-                if (r_val < 1e-4)
+            if (z_val < bot_z) {
+                if (r_val < bot_radius)
                     return true;
                 else
                     return false;
@@ -215,11 +202,11 @@ Vec accel_from_E(Vec pos, double volts)
     if (norm(inward_vec) != 0)
         inward_vec /= norm(inward_vec);
 
-    inward_vec *= norm(E_r_val);
+    inward_vec *= E_r_val;
 
     Vec e_field(-E_z_val, inward_vec.y, inward_vec.z);
 
-    return (volts * 1e-3) * (e / m_e) * e_field * 1e2;
+    return (volts / bulk_field) * (e / m_e) * e_field * 1e2;
 }
 
 #endif

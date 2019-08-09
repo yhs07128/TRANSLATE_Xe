@@ -25,7 +25,6 @@ private:
     double total_time;
 
     double energy;
-    int& ionized;
     int child_ions;
 
     std::vector<Electron*> ionization_electrons;
@@ -110,6 +109,21 @@ private:
         return time_step;
     }
 
+    void update_pos_vel()
+    {
+        Vec x_old = x;
+        
+        if (!uniform_field) {
+            x += v * time_to_collision + 0.5 * accel_from_E(x, volts_per_cm) * time_to_collision * time_to_collision;
+            v += 0.5 * (accel_from_E(x_old, volts_per_cm) + accel_from_E(x, volts_per_cm)) * time_to_collision;
+        } else {
+            x += v * time_to_collision + 0.5 * accel * time_to_collision * time_to_collision;
+            v += accel * time_to_collision;
+        }
+
+        return;
+    }
+
     void elastic_collision(double u, Vec vm)
     {
         Vec unit_vec = random_unit_vector(generator);
@@ -135,8 +149,9 @@ private:
     void ionization()
     {
         if (use_recursive_ionization) {
-            std::uniform_real_distribution<double> rand_starting_energy(1.0, 5.0);
-            ionization_electrons.push_back(new Electron(ionized, volts_per_cm, x, random_unit_vector(generator) * eV_to_v(rand_starting_energy(generator)), generator));
+            std::uniform_real_distribution<double> rand_eV(1.0, 5.0);
+            Vec near_therm_vel = random_unit_vector(generator) * eV_to_v(rand_eV(generator));
+            ionization_electrons.push_back(new Electron(ionized, volts_per_cm, x, near_therm_vel, generator));
         }
 
         remove_energy(15.76);
@@ -148,40 +163,24 @@ private:
     }
 
 public:
+    int& ionized;
+
     Electron(int& ions, double volts, Vec position, Vec velocity, std::mt19937& gen):
-        ionized(ions), child_ions(0), x(position), v(velocity), accel(-(e / m_e) * volts * 1e2), volts_per_cm(volts), total_time(0), generator(gen)
+        ionized(ions), child_ions(0), x(position), v(velocity), accel((e / m_e) * volts * 1e2, 0, 0), volts_per_cm(volts), total_time(0), generator(gen)
     {
         if (!uniform_field)
             accel = accel_from_E(x, volts_per_cm);
     
         energy = J_to_eV(0.5 * m_e * v * v);
+
     }
 
-    Vec position() const
-    {
-        return x;
-    }
-
-    Vec velocity() const
-    {
-        return v;
-    }
-
-    double elapsed_time() const
-    {
-        return total_time;
-    }
-
-    double ke() const
-    {
-        return energy;
-    }
-
-    double ions() const
-    {
-        return ionized;
-    }
-
+    Vec position() const { return x; }
+    Vec velocity() const { return v; }
+    double elapsed_time() const { return total_time; }
+    double ke() const { return energy; }
+    double ions() const { return ionized; }
+    
     void update()
     {
         for (auto elec : ionization_electrons) {
@@ -191,20 +190,12 @@ public:
         }
         
         time_to_collision = next_collision(norm(v));
-
-        Vec x_old = x;
-        if (!uniform_field) {
-            x += v * time_to_collision + 0.5 * accel_from_E(x, volts_per_cm) * time_to_collision * time_to_collision;
-            v += 0.5 * (accel_from_E(x_old, volts_per_cm) + accel_from_E(x, volts_per_cm)) * time_to_collision;
-        } else {
-            x += v * time_to_collision + 0.5 * accel * time_to_collision * time_to_collision;
-            v += accel * time_to_collision;
-        }
+        update_pos_vel();
 
         if (!interactions) {
-            if (norm(v) > 5000) {
+            if (norm(v) > 1000) {
                 v /= norm(v);
-                v *= 5000;
+                v *= 1000;
             }
         }
         
@@ -253,60 +244,5 @@ public:
         total_time += time_to_collision;
     }
 };
-
-void generate_plot(int volts, double cutoff, int cores, int write_every, std::string folder, int k, int batches, ProgressBar& bar)
-{
-    for (int i = 0; i < batches; i++) {
-        bar.new_file(cores * i + (k + 1), k);
-        int total_ions = 0;
-        std::mt19937 generator(std::chrono::system_clock::now().time_since_epoch().count());
-        Electron elec(total_ions, volts, starting_pos(generator), random_velocity(generator, true), generator);
-
-        double starting_x = 0;
-
-        if (!uniform_field)
-            starting_x = elec.position().x;
-
-        std::ofstream file("../py/studies/simulation-runs/" + std::to_string(volts) + "V - " + std::to_string(cores * i + (k + 1)) + ".txt");
-        assert(file.is_open());
-        
-        int simulation_step = 1;
-        const int total_progress_steps = 100;
-        std::array<bool, total_progress_steps> progress;
-        progress.fill(false);
-        int progress_count = 1;
-
-        while (elec.elapsed_time() < cutoff) {
-            elec.update();
-
-            if (!uniform_field && hit_check(elec.position()))
-                break;
-
-            if (simulation_step++ % write_every != 0)
-                continue;
-
-            if (uniform_field)
-                bar.update(elec.elapsed_time() / cutoff, k);
-            else
-                bar.update(1 - (elec.position().x - z_min) / ((z_max - z_min) * spawn_height_scale), k);
-
-            if (bar.min_prog(k))
-                bar.display();
-            
-            file << elec.elapsed_time() * 1e9 << "," << elec.position().x * 1e6 << "," << elec.position().y * 1e6 << "," << elec.position().z * 1e6 << "," << elec.ke() << "," << ((starting_x - elec.position().x) / elec.elapsed_time()) << "," << total_ions << "\n";
-        }
-
-        elec.update();
-
-        bar.update(1, k);
-
-        file << elec.elapsed_time() * 1e9 << "," << elec.position().x * 1e6 << "," << elec.position().y * 1e6 << "," << elec.position().z * 1e6 << "," << elec.ke() << "," << ((starting_x - elec.position().x) / elec.elapsed_time()) << "," << total_ions << "\n";
-
-        file.close();
-        assert(!file.is_open());
-    }
-
-    return;
-}
 
 #endif

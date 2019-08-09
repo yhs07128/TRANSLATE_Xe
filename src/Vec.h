@@ -9,7 +9,6 @@ public:
     double x, y, z;
 
     Vec() { }
-    Vec(double a): x(a), y(0), z(0) { } // This odd constructor is specfically to deal with the x-axis acceleration on 3D simulations
     Vec(double _x, double _y, double _z): x(_x), y(_y), z(_z) { }
 
     inline Vec& operator+=(const Vec& v)
