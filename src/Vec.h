@@ -1,8 +1,6 @@
 #ifndef VEC_H
 #define VEC_H
 
-#include <iostream>
-
 class Vec
 {
 public:
@@ -37,6 +35,11 @@ public:
     }
 };
 
+inline double dot(const Vec& v, const Vec& w)
+{
+    return v.x * w.x + v.y * w.y + v.z * w.z;
+}
+
 inline double norm(const Vec& v)
 {
     return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
@@ -50,11 +53,6 @@ inline Vec operator+(const Vec& v, const Vec& w)
 inline Vec operator-(const Vec& v, const Vec& w)
 {
     return Vec(v.x - w.x, v.y - w.y, v.z - w.z);
-}
-
-inline double operator*(const Vec& v, const Vec& w)
-{
-    return v.x * w.x + v.y * w.y + v.z * w.z;
 }
 
 inline Vec operator*(float s, const Vec& v)
