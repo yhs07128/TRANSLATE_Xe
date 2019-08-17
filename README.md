@@ -12,7 +12,7 @@ Gas cross-section data is from the BSR database, www.lxcat.net, retrieved on Jun
 You'll need Numpy, Scipy, and Matplotlib. Jupyter is required to view the preprocessing notebooks. CMake makes for an easy install.
 
 ### Installing
-Navigate to the project directory in terminal, then type
+Open the Jupyter notebooks in the preprocessing directory to generate the lookup tables for cross-sections and non-uniform electric fields. After doing so, set the necessary parameters in the Constants.h file. Then, navigate to the project directory in terminal and type
 
 ```
 mkdir build
