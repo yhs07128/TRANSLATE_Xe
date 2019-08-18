@@ -24,7 +24,6 @@ private:
     double energy;
     int child_ions;
 
-    std::vector<Electron*> ionization_electrons;
     std::mt19937& generator;
 
     int index(double v) const;
@@ -85,21 +84,18 @@ private:
 
     void update_pos_vel();
     void remove_energy(double eV);
-    void ionization();
+    void ionization(std::vector<Electron*>& electron_list, int& total_ionizations);
     void elastic_collision(double u, Vec vm);
 
 public:
-    int& ionized;
-
-    Electron(int& ions, double volts, Vec position, Vec velocity, std::mt19937& gen);
+    Electron(double initial_time, double volts, Vec position, Vec velocity, std::mt19937& gen);
 
     inline Vec position() const { return x; }
     inline Vec velocity() const { return v; }
     inline double elapsed_time() const { return total_time; }
     inline double ke() const { return energy; }
-    inline double ions() const { return ionized; }
 
-    void update();
+    void update(std::vector<Electron*>& electron_list, int& total_ionizations);
 };
 
 void generate_plot(int volts, double cutoff, int cores, int write_every, int k, int batches, ProgressBar& bar);

@@ -1,5 +1,6 @@
 #include <array>
 #include <chrono>
+#include <iostream>
 #include <fstream>
 #include <string>
 
@@ -319,14 +320,13 @@ Vec accel_from_E(Vec pos, double volts)
  * @param velocity The initial velocity vector (in m)
  * @param gen The random number generator to be used
  */
-Electron::Electron(int& ions, double volts, Vec position, Vec velocity, std::mt19937& gen):
-    ionized(ions), child_ions(0), x(position), v(velocity), accel((e / m_e) * volts * 1e2, 0, 0), volts_per_cm(volts), total_time(0), generator(gen)
+Electron::Electron(double initial_time, double volts, Vec position, Vec velocity, std::mt19937& gen):
+    child_ions(0), x(position), v(velocity), accel((e / m_e) * volts * 1e2, 0, 0), volts_per_cm(volts), total_time(initial_time), generator(gen)
 {
     if (!uniform_field)
         accel = accel_from_E(x, volts_per_cm);
 
     energy = J_to_eV(0.5 * m_e * dot(v, v));
-
 }
 
 /*
@@ -369,18 +369,20 @@ void Electron::remove_energy(double eV)
  * Removes the ionization energy of argon from the electron, then, if using the full
  * algorithm, spawns a new electron at the current one's position. The ionization counter is
  * increased by one.
+ * 
+ * @param electron_list The vector to which child electrons should be pushed
+ * @param total_ionizations The global ionization counter to increase upon ionization
  */
-void Electron::ionization()
+void Electron::ionization(std::vector<Electron*> &electron_list, int& total_ionizations)
 {
-    if (use_recursive_ionization) {
+    if (track_child_ions) {
         std::uniform_real_distribution<double> rand_eV(1.0, 5.0);
         Vec near_therm_vel = random_unit_vector(generator) * eV_to_v(rand_eV(generator));
-        ionization_electrons.push_back(new Electron(ionized, volts_per_cm, x, near_therm_vel, generator));
+        electron_list.push_back(new Electron(total_time, volts_per_cm, x, near_therm_vel, generator));
     }
 
     remove_energy(15.76);
-
-    ionized++;
+    total_ionizations++;
     child_ions++;
 
     return;
@@ -466,23 +468,17 @@ double Electron::probability(double u, double x_sec)
 
 /*
  * Advances the simulation by one step. In this order, this function...
- *      1. Updates all child electrons
- *      2. Draws a timestep
- *      3. Updates the parent electron's position and velocity
- *      4. Determines the probability of all interactions
- *      5. Simulates the interaction that passes the probability check
- *      6. Updates the parent electron's energy and total simulated time 
+ *      1. Draws a timestep
+ *      2. Updates the parent electron's position and velocity
+ *      3. Determines the probability of all interactions
+ *      4. Simulates the interaction that passes the probability check
+ *      5. Updates the electron's energy and total simulated time 
+ * 
+ * @param electron_list The vector to which child electrons should be pushed
+ * @param total_ionizations The global ionization counter to increase upon ionization
  */
-void Electron::update()
-{
-    // Updates all child electrons
-    for (auto elec : ionization_electrons) {
-        elec->update();
-        // If a child electron hits a tip, end its simulation
-        if (!uniform_field)
-            ionization_electrons.erase(std::remove_if(ionization_electrons.begin(), ionization_electrons.end(), [](auto const& i){ return hit_check(i->x); }), ionization_electrons.end());
-    }
-    
+void Electron::update(std::vector<Electron*> &electron_list, int& total_ionizations)
+{   
     // Draw a timestep and update the electron's position and velocity
     time_to_collision = next_collision(norm(v));
     update_pos_vel();
@@ -526,7 +522,7 @@ void Electron::update()
     
     // Simulate the interaction that passes the check
     if (prob < ion_prob) {
-        ionization();
+        ionization(electron_list, total_ionizations);
     } else if (prob < (ion_prob + ex_11_prob)) {
         remove_energy(11.68);
     } else if (prob < (ion_prob + ex_11_prob + ex_13_prob)) {
@@ -562,45 +558,79 @@ void Electron::update()
 void generate_plot(int volts, double cutoff, int cores, int write_every, int k, int batches, ProgressBar& bar)
 {
     for (int i = 0; i < batches; i++) {
+        // Setup a progress bar and create the random number generator for the thread
         bar.new_file(cores * i + (k + 1), k);
         std::mt19937 generator(std::chrono::system_clock::now().time_since_epoch().count());
 
-        int total_ions = 0;
-        Electron elec(total_ions, volts, starting_pos(generator), random_velocity(generator, true), generator);
+        // Setup the array of electrons to be simulated
+        std::vector<Electron*> electron_list;
+        electron_list.push_back(new Electron(0, volts, starting_pos(generator), random_velocity(generator, true), generator));
 
-        double starting_x = 0;
-        if (!uniform_field)
-            starting_x = elec.position().x;
-
+        // Open the file to write to
         std::ofstream file("../py/simulation-runs/" + std::to_string(volts) + "V - " + std::to_string(cores * i + (k + 1)) + ".txt");
         assert(file.is_open());
         
+        // Grab initial conditions
+        double starting_x = 0;
+        if (!uniform_field)
+            starting_x = electron_list[0]->position().x;
+        double t = electron_list.front()->elapsed_time();
+        double x = electron_list.front()->position().x;
+        double y = electron_list.front()->position().y;
+        double z = electron_list.front()->position().z;
+        double ke = electron_list.front()->ke();
+        double vd = x - starting_x / t;
+        int total_ionizations = 0;
+
+        // Create a counter to check against when skipping steps to be written
         int simulation_step = 1;
 
-        while (elec.elapsed_time() < cutoff) {
-            elec.update();
+        while (electron_list[0]->elapsed_time() < cutoff) {
+            // Update electrons, adding child electrons if necessary
+            std::vector<Electron*> new_electrons;
+            for (auto elec : electron_list)
+                elec->update(new_electrons, total_ionizations);
+            electron_list.insert(electron_list.end(), new_electrons.begin(), new_electrons.end());
 
-            if (!uniform_field && hit_check(elec.position()))
+            // Get the relevant information of the primary electron (saved here in case this loop ends)
+            t = electron_list.front()->elapsed_time();
+            x = electron_list.front()->position().x;
+            y = electron_list.front()->position().y;
+            z = electron_list.front()->position().z;
+            ke = electron_list.front()->ke();
+            vd = x - starting_x / t;
+
+            // Remove electrons that have reached the anode
+            if (!uniform_field)
+                electron_list.erase(std::remove_if(electron_list.begin(), electron_list.end(), [](auto const& i){ return hit_check(i->position()); }), electron_list.end());
+
+            // If all electrons have reached the anode, end the simulation
+            if ((!uniform_field) && (electron_list.size() == 0))
                 break;
 
+            // Only save every write_every steps
             if (simulation_step++ % write_every != 0)
                 continue;
 
+            // Update the progress bar
             if (uniform_field)
-                bar.update(elec.elapsed_time() / cutoff, k);
+                bar.update(electron_list.front()->elapsed_time() / cutoff, k);
             else
-                bar.update(1 - (elec.position().x - z_min) / ((z_max - z_min) * spawn_height_scale), k);
+                bar.update(1 - (electron_list.front()->position().x - z_min) / ((z_max - z_min) * spawn_height_scale), k);
 
+            // Display the progress bar
             if (bar.min_prog(k))
                 bar.display();
             
-            file << elec.elapsed_time() * 1e9 << "," << elec.position().x * 1e6 << "," << elec.position().y * 1e6 << "," << elec.position().z * 1e6 << "," << elec.ke() << "," << ((elec.position().x - starting_x) / elec.elapsed_time()) << "," << total_ions << "\n";
+            // Write the primary electron's information to a file (if using the full ionization algorithm, this may cause only the time and total ionizations to be accurate)
+            file << t * 1e9 << "," << x * 1e6 << "," << y * 1e6 << "," << z * 1e6 << "," << ke << "," << vd << "," << total_ionizations << "\n";
         }
 
-        elec.update();
+        // Update the progress bar one last time
         bar.update(1, k);
 
-        file << elec.elapsed_time() * 1e9 << "," << elec.position().x * 1e6 << "," << elec.position().y * 1e6 << "," << elec.position().z * 1e6 << "," << elec.ke() << "," << ((elec.position().x - starting_x) / elec.elapsed_time()) << "," << total_ions << "\n";
+        // Write information to the file one last time (to catch all final ionizations)
+        file << t * 1e9 << "," << x * 1e6 << "," << y * 1e6 << "," << z * 1e6 << "," << ke << "," << vd << "," << total_ionizations << "\n";
         file.close();
         assert(!file.is_open());
     }
