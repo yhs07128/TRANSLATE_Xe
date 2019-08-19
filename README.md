@@ -1,5 +1,5 @@
 # LArCADe
-Simulation of electron transport in LAr under non-uniform electric fields for LArCADe at FNAL.
+Simulation of electron transport in LAr under non-uniform electric fields for LArCADe at FNAL. Studies generated with this simulation can be found at https://github.com/zbeever/LArCADe-studies.
 
 Basis of simulation outlined in Wojcik, M., & Tachiya, M. (2002). Electron transport and electron–ion recombination in liquid argon: Simulation based on the Cohen–Lekner theory. Chemical Physics Letters, 363(3-4), 381-388. doi:10.1016/s0009-2614(02)01177-6
 
