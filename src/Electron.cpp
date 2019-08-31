@@ -121,7 +121,7 @@ Vec starting_pos(std::mt19937& gen)
  */
 double shift_coord(double x)
 {
-    bool negative = signbit(x);
+    bool negative = std::signbit(x);
     double width = r_max - r_min;
     
     if (negative) {
@@ -579,7 +579,7 @@ void generate_plot(int volts, double cutoff, int cores, int write_every, int k, 
         double y = electron_list.front()->position().y;
         double z = electron_list.front()->position().z;
         double ke = electron_list.front()->ke();
-        double vd = x - starting_x / t;
+        double vd = (x - starting_x) / t;
         int total_ionizations = 0;
 
         // Create a counter to check against when skipping steps to be written
@@ -598,7 +598,7 @@ void generate_plot(int volts, double cutoff, int cores, int write_every, int k, 
             y = electron_list.front()->position().y;
             z = electron_list.front()->position().z;
             ke = electron_list.front()->ke();
-            vd = x - starting_x / t;
+            vd = (x - starting_x) / t;
 
             // Remove electrons that have reached the anode
             if (!uniform_field)
