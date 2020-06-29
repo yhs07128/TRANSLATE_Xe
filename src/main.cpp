@@ -45,7 +45,7 @@ int main()
 
     int cores = std::thread::hardware_concurrency();
     if (cores < 1) cores = 1;
-
+    cores = 4;
     int batches;
     std::cout << "Batches (in groups of " + std::to_string(cores) + "): ";
     std::cin >> batches;

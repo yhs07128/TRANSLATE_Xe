@@ -54,6 +54,7 @@ private:
      * @return The ionization cross-section (in cm^2)
      */
     inline double x_sec_i(double v) const { return ionization_xsec[index(v)]; }
+     
 
     /*
      * Given a velocity, returns the excitation cross-section at the 
@@ -66,14 +67,15 @@ private:
     inline double x_sec_ex(double v, int level) const
     {
         switch (level) {
+	  
             case 11:
                 return excite_xsec_11[index(v)];
             case 13:
                 return excite_xsec_13[index(v)];
             case 14:
                 return excite_xsec_14[index(v)];
-            case 15:
-                return excite_xsec_15[index(v)];
+	    case 15:
+	      return excite_xsec_15[index(v)];
             default:
                 assert(false);
         }

@@ -524,13 +524,13 @@ void Electron::update(std::vector<Electron*> &electron_list, int& total_ionizati
     if (prob < ion_prob) {
         ionization(electron_list, total_ionizations);
     } else if (prob < (ion_prob + ex_11_prob)) {
-        remove_energy(11.68);
+        remove_energy(0.00);
     } else if (prob < (ion_prob + ex_11_prob + ex_13_prob)) {
-        remove_energy(13.21);
+        remove_energy(11.68);
     } else if (prob < (ion_prob + ex_11_prob + ex_13_prob + ex_14_prob)) {
-        remove_energy(14.10);
+        remove_energy(13.33);
     } else if (prob < (ion_prob + ex_11_prob + ex_13_prob + ex_14_prob + ex_15_prob)) {
-        remove_energy(15.23);
+        remove_energy(14.22);
     } else if (prob < (ion_prob + ex_11_prob + ex_13_prob + ex_14_prob + ex_15_prob + col_prob)) {
         elastic_collision(u, vm);
     }

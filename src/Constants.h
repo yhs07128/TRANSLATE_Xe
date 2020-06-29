@@ -23,7 +23,7 @@ const double beta = 1 / lambda;                 // Mean of the exponential distr
 // Editable parameters
 const bool is_gas = false;                      // Is this in gas? Or liquid? Make sure to update the number density
 const bool track_child_ions = true;             // Keep track of child electrons and their ionizations? Or only ionizations of the main, simulated electron?
-const bool uniform_field = false;               // Is this in a uniform field? Or are we simulating a tip / tip array?
+const bool uniform_field = true;               // Is this in a uniform field? Or are we simulating a tip / tip array?
 const bool interactions = true;                 // Simulate interactions?
 const bool single_tip = true;                   // Is this is a non-uniform field, simulate a single tip? Or simulate an array of tips?
 const double spawn_height_scale = 1.0;          // Within the simulated volume (when using a non-uniform field), where should the spawn disc be located? 1.0 is at the top, 0.0 is at the bottom.
