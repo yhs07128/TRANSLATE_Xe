@@ -255,6 +255,7 @@ int r_index(double r_val)
     return floor(r_conversion_factor * (r_val - r_min));
 }
 
+
 /*
  * Gives the height index to access the electric field lookup table.
  * 
@@ -327,7 +328,10 @@ Electron::Electron(double initial_time, double volts, Vec position, Vec velocity
         accel = accel_from_E(x, volts_per_cm);
 
     energy = J_to_eV(0.5 * m_e * dot(v, v));
+
+    scatter = 0;
 }
+
 
 /*
  * Gives the index to be used when accessing cross-section lookup tables.
@@ -347,6 +351,44 @@ int Electron::index(double v) const
 
     return ind;
 }
+
+
+/*
+ * Gives the index to be used when accessing cross-section lookup tables.
+ * 
+ * @param v The velocity of the electron (in m/s) (this is sometimes the velocity of the electron relative to a chosen argon atom)
+ * @return The associated index
+ */
+int Electron::index_diff(double v) const
+{
+  double E = J_to_eV(0.5 * m_e * v * v);
+
+  int ind = 0;
+  
+  if (E < eV_min_diff){
+    E = eV_min_diff;
+    ind = 0;
+  }
+  else if (E > eV_max_diff) {
+    E = eV_max_diff;
+    ind = eV_steps_diff - 1;
+  }
+  else {
+    while (E <= energy_vals_diff[ind])
+      ind++;
+  }
+
+  //std::cout << std::scientific;
+  //std::cout << "[ DEBUG ] Energy " << E << " -> index " << ind << std::endl;
+
+  // account for binning taking energy and angle bins into account
+  ind = 1 + ind * (angle_steps_diff + 2);
+
+  //std::cout << "[ DEBUG ] final index " << ind << std::endl;
+  
+  return ind;
+}
+
 
 /*
  * Removes an amount of energy from the electron, then updates its velocity to match.
@@ -417,6 +459,84 @@ void Electron::elastic_collision(double u, Vec vm)
     return;
 }
 
+
+/*
+ * Updates the electron's velocity, assuming an elastic collision with an argon
+ * atom accounting for angle-depenence in xsec.
+ * reference: http://homepages.engineering.auckland.ac.nz/~pkel015/SolidMechanicsBooks/Part_III/Chapter_1_Vectors_Tensors/Vectors_Tensors_05_Coordinate_Transformation_Vectors.pdf
+ * reference: https://mathworld.wolfram.com/SphericalCoordinates.html
+ * 
+ * @param u The magnitude of the electron's velocity relative to a chosen argon atom (in m/s)
+ * @param vm The chosen argon atom's velocity vector (in m/s)
+ */
+void Electron::elastic_collision_diff(double u, Vec vm)
+{
+
+  auto scatterinfo = x_sec_e_angle_diff(u);
+
+  double theta = scatterinfo.second * 3.1415 / 180.; // scattering angle in radians
+
+  scatter = scatterinfo.second;
+  
+  //std::cout << std::scientific << " [ DEBUG ] " << " simulated scattering angle in rad is " << theta << std::endl;
+
+  // calculate cosine of scatter -> this is the component w.r.t. the
+  // incoming electron's direction
+  double uz = cos(theta);
+
+  //std::cout << std::scientific << " [ DEBUG ] " << " simulated scattering angle in rad is " << theta << " with cos(theta) = " << uz << std::endl;
+
+  // random unit vector
+  
+  // random phi angle to complete full determination of new direction vector
+  std::uniform_real_distribution<double> uniform(0.0, 2 * 3.1415);
+  double phi = 0.0;//uniform(generator);
+  //std::cout << std::scientific << " [ DEBUG ] " << " simulated angle phi in rad is " << phi << std::endl;
+
+  double ux = cos(phi) * sin(theta);
+  double uy = sin(phi) * sin(theta);
+
+  //std::cout << std::scientific << " [ DEBUG ] " << " scatter angle     vector ( " << ux << ", " << uy << ", " << uz << ") with magnitude " << norm(v) << std::endl;
+  
+  //std::cout << std::scientific << " [ DEBUG ] " << " original velocity vector ( " << v.x << ", " << v.y << ", " << v.z << ") with magnitude " << norm(v) << std::endl;
+  
+  // compute "velocity" vector phi and theta
+  double phi_vel = atan2(v.y,v.x);
+  double theta_vel = acos(v.z / norm(v));
+  // define coordinate vectors of phi_vel / theta_vel coordinate system
+  // in the standard cartesian coordinate system
+  //Vec r3(cos(phi_vel)*sin(theta_vel), sin(phi_vel)*sin(theta_vel), cos(theta_vel));
+  //Vec r2(-sin(phi_vel),cos(phi_vel),0.);
+  //Vec r1(cos(phi_vel)*cos(theta_vel),sin(phi_vel)*cos(theta_vel),-sin(theta_vel));
+
+  // apply rotation
+  //Vec e1(1,0,0);
+  //Vec e2(0,1,0);
+  //Vec e3(0,0,1);
+  
+  //double ux_rot = dot(r1,e1) * ux + dot(r1,e2) * uy + dot(r1,e3) * uz;
+  //double uy_rot = dot(r2,e1) * ux + dot(r2,e2) * uy + dot(r2,e3) * uz;
+  //double uz_rot = dot(r3,e1) * ux + dot(r3,e2) * uy + dot(r3,e3) * uz;
+
+  double ux_rot = cos(phi_vel) * cos(theta_vel) * ux - sin(phi_vel) * uy + cos(phi_vel) * sin(theta_vel) * uz;
+  double uy_rot = sin(phi_vel) * cos(theta_vel) * ux + cos(phi_vel) * uy + sin(phi_vel) * sin(theta_vel) * uz;
+  double uz_rot = -sin(theta_vel) * ux + cos(theta_vel) * uz;
+
+  Vec newdir(ux_rot,uy_rot,uz_rot);
+  //std::cout << std::scientific << " [ DEBUG ] " << " direction unit vector norm is " << norm(newdir) << std::endl;
+
+  // dot product between old and new direction vector
+  double dirdot = dot(newdir,v) / (norm(v) * norm(newdir));
+  //std::cout << std::scientific << " [ DEBUG ] scatter dot product is " << dirdot << " and simulated angle is " << cos(theta) << std::endl;
+
+  v = newdir * norm(v);
+
+  //std::cout << std::scientific << " [ DEBUG ] " << " output velocity vector ( " << v.x << ", " << v.y << ", " << v.z << ") with magnitude " << norm(v) << std::endl;  
+  
+  return;
+}
+
+
 /*
  * Classically updates the electron's position and velocity.
  */
@@ -462,6 +582,13 @@ double Electron::next_collision(double u)
 double Electron::probability(double u, double x_sec)
 {
     double prob = (u * 1e2 * x_sec) / K_max;
+
+    /*
+    std::cout << std::scientific;
+    std::cout << "[ DEBUG ] K max : " << K_max << std::endl;
+    std::cout << "[ DEBUG ] Prob  : " << prob << std::endl;
+    */
+    
     assert (prob < 1);
     return prob;
 }
@@ -483,6 +610,8 @@ void Electron::update(std::vector<Electron*> &electron_list, int& total_ionizati
     time_to_collision = next_collision(norm(v));
     update_pos_vel();
 
+    scatter = -1;
+
     // If interactions are turned off, implement a terminal velocity
     if (!interactions) {
         if (norm(v) > 1000) {
@@ -496,8 +625,8 @@ void Electron::update(std::vector<Electron*> &electron_list, int& total_ionizati
 
     Vec vm = random_velocity(generator);
     double u = norm(v - vm);
-    
-    double col_prob = probability(u, x_sec_e(u));
+
+    double col_prob = probability(u, x_sec_e_diff(u));
     double ion_prob = probability(u, x_sec_i(u));
 
     double ex_11_prob = probability(u, x_sec_ex(u, 11));
@@ -532,7 +661,7 @@ void Electron::update(std::vector<Electron*> &electron_list, int& total_ionizati
     } else if (prob < (ion_prob + ex_11_prob + ex_13_prob + ex_14_prob + ex_15_prob)) {
         remove_energy(14.22);
     } else if (prob < (ion_prob + ex_11_prob + ex_13_prob + ex_14_prob + ex_15_prob + col_prob)) {
-        elastic_collision(u, vm);
+        elastic_collision_diff(u, vm);
     }
     
     // Update the electron's energy and total time simulated
@@ -580,6 +709,7 @@ void generate_plot(int volts, double cutoff, int cores, int write_every, int k, 
         double z = electron_list.front()->position().z;
         double ke = electron_list.front()->ke();
         double vd = (x - starting_x) / t;
+	double s = electron_list.front()->angle();
         int total_ionizations = 0;
 
         // Create a counter to check against when skipping steps to be written
@@ -599,6 +729,9 @@ void generate_plot(int volts, double cutoff, int cores, int write_every, int k, 
             z = electron_list.front()->position().z;
             ke = electron_list.front()->ke();
             vd = (x - starting_x) / t;
+	    s  = electron_list.front()->angle();
+
+	    if (s < 0) continue;
 
             // Remove electrons that have reached the anode
             if (!uniform_field)
@@ -621,16 +754,16 @@ void generate_plot(int volts, double cutoff, int cores, int write_every, int k, 
             // Display the progress bar
             if (bar.min_prog(k))
                 bar.display();
-            
+
             // Write the primary electron's information to a file (if using the full ionization algorithm, this may cause only the time and total ionizations to be accurate)
-            file << t * 1e9 << "," << x * 1e6 << "," << y * 1e6 << "," << z * 1e6 << "," << ke << "," << vd << "," << total_ionizations << "\n";
+            file << t * 1e9 << "," << x * 1e6 << "," << y * 1e6 << "," << z * 1e6 << "," << ke << "," << vd << ","<< s << "," << total_ionizations << "\n";
         }
 
         // Update the progress bar one last time
         bar.update(1, k);
 
         // Write information to the file one last time (to catch all final ionizations)
-        file << t * 1e9 << "," << x * 1e6 << "," << y * 1e6 << "," << z * 1e6 << "," << ke << "," << vd << "," << total_ionizations << "\n";
+        file << t * 1e9 << "," << x * 1e6 << "," << y * 1e6 << "," << z * 1e6 << "," << ke << "," << vd << ","<< s << "," << total_ionizations << "\n";
         file.close();
         assert(!file.is_open());
     }

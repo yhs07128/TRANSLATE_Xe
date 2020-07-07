@@ -33,6 +33,7 @@ public:
         z *= k;
         return *this;
     }
+
 };
 
 inline double dot(const Vec& v, const Vec& w)
