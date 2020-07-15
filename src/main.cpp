@@ -45,8 +45,9 @@ int main()
 
     int cores = std::thread::hardware_concurrency();
     if (cores < 1) cores = 1;
-    cores = 4;
-    int batches;
+    cores = 2;
+    int batches = 1;
+
     std::cout << "Batches (in groups of " + std::to_string(cores) + "): ";
     std::cin >> batches;
     while (std::cin.fail()) {
@@ -55,13 +56,25 @@ int main()
         std::cin >> batches;
     }
 
+
+    int debug = 0;
+    /*
+    std::cout << "debug? ";
+    std::cin >> debug;
+    while (std::cin.fail()) {
+        std::cin.clear();
+        std::cin.ignore();
+        std::cin >> debug;
+    }
+    */
+
     // Distributes the requested number of simulations among the processor cores
     for (int j = 0; j < volts_list.size(); j++) {
         std::thread branches[cores];
         ProgressBar bar(cores);
 
         for (int k = 0; k < cores; k++) {
-            branches[k] = std::thread(generate_plot, int(volts_list[j]), cutoff, cores, write_every, k, batches, std::ref(bar));   
+	  branches[k] = std::thread(generate_plot, int(volts_list[j]), cutoff, cores, write_every, k, batches, debug, std::ref(bar));   
         }
     
         for (int k = 0; k < cores; k++) {

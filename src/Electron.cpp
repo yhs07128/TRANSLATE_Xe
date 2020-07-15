@@ -321,8 +321,8 @@ Vec accel_from_E(Vec pos, double volts)
  * @param velocity The initial velocity vector (in m)
  * @param gen The random number generator to be used
  */
-Electron::Electron(double initial_time, double volts, Vec position, Vec velocity, std::mt19937& gen):
-    child_ions(0), x(position), v(velocity), accel((e / m_e) * volts * 1e2, 0, 0), volts_per_cm(volts), total_time(initial_time), generator(gen)
+Electron::Electron(double initial_time, double volts, Vec position, Vec velocity, std::mt19937& gen, int debug):
+  child_ions(0), x(position), v(velocity), accel((e / m_e) * volts * 1e2, 0, 0), volts_per_cm(volts), total_time(initial_time), generator(gen), debug(debug)
 {
     if (!uniform_field)
         accel = accel_from_E(x, volts_per_cm);
@@ -348,6 +348,8 @@ int Electron::index(double v) const
 
     int ind = round(((eV_steps - 1) / log10(eV_max / eV_min)) * (log10(E) - log10(eV_min)));
     assert(ind < 1000);
+
+    if (debug) { std::cout << std::scientific << "[ DEBUG ] velocity " << v << " corresponds to energy " << E << std::endl; }
 
     return ind;
 }
@@ -378,13 +380,14 @@ int Electron::index_diff(double v) const
       ind++;
   }
 
-  //std::cout << std::scientific;
-  //std::cout << "[ DEBUG ] Energy " << E << " -> index " << ind << std::endl;
-
   // account for binning taking energy and angle bins into account
   ind = 1 + ind * (angle_steps_diff + 2);
 
-  //std::cout << "[ DEBUG ] final index " << ind << std::endl;
+  if (debug) {
+    std::cout << std::scientific;
+    std::cout << "[ DEBUG ] Energy " << E << " -> index " << ind << std::endl;
+    std::cout << "[ DEBUG ] final index " << ind << std::endl;
+  }
   
   return ind;
 }
@@ -420,7 +423,7 @@ void Electron::ionization(std::vector<Electron*> &electron_list, int& total_ioni
     if (track_child_ions) {
         std::uniform_real_distribution<double> rand_eV(1.0, 5.0);
         Vec near_therm_vel = random_unit_vector(generator) * eV_to_v(rand_eV(generator));
-        electron_list.push_back(new Electron(total_time, volts_per_cm, x, near_therm_vel, generator));
+        electron_list.push_back(new Electron(total_time, volts_per_cm, x, near_therm_vel, generator,debug));
     }
 
     remove_energy(15.76);
@@ -477,28 +480,33 @@ void Electron::elastic_collision_diff(double u, Vec vm)
   double theta = scatterinfo.second * 3.1415 / 180.; // scattering angle in radians
 
   scatter = scatterinfo.second;
-  
-  //std::cout << std::scientific << " [ DEBUG ] " << " simulated scattering angle in rad is " << theta << std::endl;
+
+  if (debug)
+  std::cout << std::scientific << " [ DEBUG ] " << " simulated scattering angle in rad is " << theta << std::endl;
 
   // calculate cosine of scatter -> this is the component w.r.t. the
   // incoming electron's direction
   double uz = cos(theta);
 
-  //std::cout << std::scientific << " [ DEBUG ] " << " simulated scattering angle in rad is " << theta << " with cos(theta) = " << uz << std::endl;
+  if (debug)
+    std::cout << std::scientific << " [ DEBUG ] " << " simulated scattering angle in rad is " << theta << " with cos(theta) = " << uz << std::endl;
 
   // random unit vector
   
   // random phi angle to complete full determination of new direction vector
   std::uniform_real_distribution<double> uniform(0.0, 2 * 3.1415);
   double phi = 0.0;//uniform(generator);
-  //std::cout << std::scientific << " [ DEBUG ] " << " simulated angle phi in rad is " << phi << std::endl;
+
+  if (debug)
+    std::cout << std::scientific << " [ DEBUG ] " << " simulated angle phi in rad is " << phi << std::endl;
 
   double ux = cos(phi) * sin(theta);
   double uy = sin(phi) * sin(theta);
 
-  //std::cout << std::scientific << " [ DEBUG ] " << " scatter angle     vector ( " << ux << ", " << uy << ", " << uz << ") with magnitude " << norm(v) << std::endl;
-  
-  //std::cout << std::scientific << " [ DEBUG ] " << " original velocity vector ( " << v.x << ", " << v.y << ", " << v.z << ") with magnitude " << norm(v) << std::endl;
+  if (debug) {
+    std::cout << std::scientific << " [ DEBUG ] " << " scatter angle     vector ( " << ux << ", " << uy << ", " << uz << ") with magnitude " << norm(v) << std::endl;
+    std::cout << std::scientific << " [ DEBUG ] " << " original velocity vector ( " << v.x << ", " << v.y << ", " << v.z << ") with magnitude " << norm(v) << std::endl;
+  }
   
   // compute "velocity" vector phi and theta
   double phi_vel = atan2(v.y,v.x);
@@ -523,15 +531,20 @@ void Electron::elastic_collision_diff(double u, Vec vm)
   double uz_rot = -sin(theta_vel) * ux + cos(theta_vel) * uz;
 
   Vec newdir(ux_rot,uy_rot,uz_rot);
-  //std::cout << std::scientific << " [ DEBUG ] " << " direction unit vector norm is " << norm(newdir) << std::endl;
+
+  if (debug) 
+    std::cout << std::scientific << " [ DEBUG ] " << " direction unit vector norm is " << norm(newdir) << std::endl;
 
   // dot product between old and new direction vector
   double dirdot = dot(newdir,v) / (norm(v) * norm(newdir));
-  //std::cout << std::scientific << " [ DEBUG ] scatter dot product is " << dirdot << " and simulated angle is " << cos(theta) << std::endl;
+
+  if (debug)
+    std::cout << std::scientific << " [ DEBUG ] scatter dot product is " << dirdot << " and simulated angle is " << cos(theta) << std::endl;
 
   v = newdir * norm(v);
 
-  //std::cout << std::scientific << " [ DEBUG ] " << " output velocity vector ( " << v.x << ", " << v.y << ", " << v.z << ") with magnitude " << norm(v) << std::endl;  
+  if (debug)
+    std::cout << std::scientific << " [ DEBUG ] " << " output velocity vector ( " << v.x << ", " << v.y << ", " << v.z << ") with magnitude " << norm(v) << std::endl;  
   
   return;
 }
@@ -583,11 +596,12 @@ double Electron::probability(double u, double x_sec)
 {
     double prob = (u * 1e2 * x_sec) / K_max;
 
-    /*
-    std::cout << std::scientific;
-    std::cout << "[ DEBUG ] K max : " << K_max << std::endl;
-    std::cout << "[ DEBUG ] Prob  : " << prob << std::endl;
-    */
+    if (debug) {
+      std::cout << std::scientific;
+      std::cout << "[ DEBUG ] K max : " << K_max << std::endl;
+      std::cout << "[ DEBUG ] Prob  : " << prob << std::endl;
+      std::cout << "[ DEBUG ] reached a simulation time of " << total_time << std::endl;
+    }
     
     assert (prob < 1);
     return prob;
@@ -619,19 +633,29 @@ void Electron::update(std::vector<Electron*> &electron_list, int& total_ionizati
             v *= 1000;
         }
     }
-    
+
     // Draw an argon vector and determine interaction probabilities
     energy = J_to_eV(0.5 * m_e * dot(v, v));
 
     Vec vm = random_velocity(generator);
     double u = norm(v - vm);
 
+    if (debug) { std::cout << "[ DEBUG ] elastic collision..." << std::endl; }
+    
     double col_prob = probability(u, x_sec_e_diff(u));
-    double ion_prob = probability(u, x_sec_i(u));
 
+    if (debug)
+      std::cout << std::scientific << "[ DEBUG ] velocity "  << u << " and prob " << col_prob << std::endl;
+
+    if (debug) { std::cout << "[ DEBUG ] ionization..." << std::endl; }
+    double ion_prob = probability(u, x_sec_i(u));
+    if (debug) { std::cout << "[ DEBUG ] excitation 11..." << std::endl; }
     double ex_11_prob = probability(u, x_sec_ex(u, 11));
+    if (debug) { std::cout << "[ DEBUG ] excitation 13..." << std::endl; }
     double ex_13_prob = probability(u, x_sec_ex(u, 13));
+    if (debug) { std::cout << "[ DEBUG ] excitation 14..." << std::endl; }
     double ex_14_prob = probability(u, x_sec_ex(u, 14));
+    if (debug) { std::cout << "[ DEBUG ] excication 15..." << std::endl; }
     double ex_15_prob = probability(u, x_sec_ex(u, 15));
 
     assert(col_prob + ion_prob + ex_11_prob + ex_13_prob + ex_14_prob + ex_15_prob <= 1);
@@ -684,7 +708,7 @@ void Electron::update(std::vector<Electron*> &electron_list, int& total_ionizati
  * @param batches The number of batches to be generated
  * @param bar The progress bar to be used
  */
-void generate_plot(int volts, double cutoff, int cores, int write_every, int k, int batches, ProgressBar& bar)
+void generate_plot(int volts, double cutoff, int cores, int write_every, int k, int batches, int debug, ProgressBar& bar)
 {
     for (int i = 0; i < batches; i++) {
         // Setup a progress bar and create the random number generator for the thread
@@ -693,7 +717,7 @@ void generate_plot(int volts, double cutoff, int cores, int write_every, int k, 
 
         // Setup the array of electrons to be simulated
         std::vector<Electron*> electron_list;
-        electron_list.push_back(new Electron(0, volts, starting_pos(generator), random_velocity(generator, true), generator));
+        electron_list.push_back(new Electron(0, volts, starting_pos(generator), random_velocity(generator, true), generator, debug));
 
         // Open the file to write to
         std::ofstream file("../py/simulation-runs/" + std::to_string(volts) + "V - " + std::to_string(cores * i + (k + 1)) + ".txt");
@@ -731,7 +755,7 @@ void generate_plot(int volts, double cutoff, int cores, int write_every, int k, 
             vd = (x - starting_x) / t;
 	    s  = electron_list.front()->angle();
 
-	    if (s < 0) continue;
+	    //if (s < 0) continue;
 
             // Remove electrons that have reached the anode
             if (!uniform_field)

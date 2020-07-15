@@ -20,6 +20,8 @@ private:
     Vec x, v, accel;
 
     double scatter;
+
+    int debug;
     
     double volts_per_cm;
     double time_to_collision;
@@ -55,9 +57,11 @@ private:
 
       auto xsec = momentum_xsec_gas_diff[idx];
 
-      //std::cout << std::scientific;
-      //std::cout << "[ DEBUG ] xsec @ idx " << 1 << " is " << momentum_xsec_gas_diff[1] << std::endl;
-      //std::cout << "[ DEBUG ] xsec @ idx " << idx << " is " << xsec << std::endl;
+      if (debug) {
+	std::cout << std::scientific;
+	std::cout << "[ DEBUG ] xsec @ idx " << 1 << " is " << momentum_xsec_gas_diff[1] << std::endl;
+	std::cout << "[ DEBUG ] xsec @ idx " << idx << " is " << xsec << std::endl;
+      }
       
       return xsec;
     }
@@ -84,9 +88,11 @@ private:
 
       // relative differential max of xsec to make sampling more efficient
       double relmax = *(std::max_element(arrbegin + idx, arrbegin + idx + 180));
-      //std::cout << "[ DEBUG ] maxium relative cross-section for cross-section at index " << idx << " is " << relmax << std::endl;
-      
-      //std::cout << "[ DEBUG ] xsec max for velocity " << v << " and bin " << idx << "is" << relmax << std::endl;
+
+      if (debug) {
+	std::cout << "[ DEBUG ] maxium relative cross-section for cross-section at index " << idx << " is " << relmax << std::endl;
+	std::cout << "[ DEBUG ] xsec max for velocity " << v << " and bin " << idx << "is" << relmax << std::endl;
+      }
 
       // now find the direction of the scatter
       bool direction = false;
@@ -95,7 +101,7 @@ private:
 	angle = uniform(generator) * 180.;
 	double prob  = uniform(generator) * relmax;
 	double relxsec = momentum_xsec_gas_diff[idx + int(angle)];
-	//std::cout << "[ DEBUG ] for angle " << angle << " we simulated a probability of " << prob << " and the local rel xsec prob is " << relxsec << std::endl;
+	if (debug) std::cout << "[ DEBUG ] for angle " << angle << " we simulated a probability of " << prob << " and the local rel xsec prob is " << relxsec << std::endl;
 	if (prob < relxsec)
 	  direction = true;
       }
@@ -131,16 +137,24 @@ private:
      */
     inline double x_sec_ex(double v, int level) const
     {
+
+      auto idx = index(v);
+
+      if (debug) {
+	std::cout << std::scientific
+		  << "[ DEBUG ] velocity " << v << " -> index " << idx << std::endl;
+      }
+      
         switch (level) {
 	  
             case 11:
-                return excite_xsec_11[index(v)];
+                return excite_xsec_11[idx];
             case 13:
-                return excite_xsec_13[index(v)];
+                return excite_xsec_13[idx];
             case 14:
-                return excite_xsec_14[index(v)];
+                return excite_xsec_14[idx];
 	    case 15:
-	      return excite_xsec_15[index(v)];
+	      return excite_xsec_15[idx];
             default:
                 assert(false);
         }
@@ -156,7 +170,7 @@ private:
     void elastic_collision_diff(double u, Vec vm);
 
 public:
-    Electron(double initial_time, double volts, Vec position, Vec velocity, std::mt19937& gen);
+    Electron(double initial_time, double volts, Vec position, Vec velocity, std::mt19937& gen, int debug);
 
     inline Vec position() const { return x; }
     inline Vec velocity() const { return v; }
@@ -167,6 +181,6 @@ public:
     void update(std::vector<Electron*>& electron_list, int& total_ionizations);
 };
 
-void generate_plot(int volts, double cutoff, int cores, int write_every, int k, int batches, ProgressBar& bar);
+void generate_plot(int volts, double cutoff, int cores, int write_every, int k, int batches, int debug, ProgressBar& bar);
 
 #endif
