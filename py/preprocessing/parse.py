@@ -22,6 +22,7 @@ for line in fin:
     if (len(words) == 22510):
         ctr = -1
         xsecctr = 0
+        newwords = []
         for word in words:
             ctr += 1
             try:
@@ -31,11 +32,25 @@ for line in fin:
                     #print 'xsec   : ',xsecval 
                     energy_v.append( float(words[ctr-1]) )
                     xsec_v.append(xsecval)
-                    words[ctr] = xsec_new_v[xsecctr]
+                    newwords.append(str(xsec_new_v[xsecctr]))
+                    #words[ctr] = 
                     xsecctr += 1
                     #print xsecval
+                else:
+                    newwords.append(word)
+            
             except:
+                newwords.append(word)
                 continue
+        newstr = ""
+        for i,word in enumerate(newwords):
+            newstr += word
+            if (i < len(newwords)-1):
+                newstr += ","
+            if (i == len(newwords)-1):
+                newstr += '\n'
+        fout.write(newstr)
+            
     else:
         print line
         fout.write(line)
