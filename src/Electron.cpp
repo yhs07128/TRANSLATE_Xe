@@ -495,7 +495,7 @@ void Electron::elastic_collision_diff(double u, Vec vm)
   
   // random phi angle to complete full determination of new direction vector
   std::uniform_real_distribution<double> uniform(0.0, 2 * 3.1415);
-  double phi = 0.0;//uniform(generator);
+  double phi = uniform(generator);
 
   if (debug)
     std::cout << std::scientific << " [ DEBUG ] " << " simulated angle phi in rad is " << phi << std::endl;
@@ -535,11 +535,11 @@ void Electron::elastic_collision_diff(double u, Vec vm)
   if (debug) 
     std::cout << std::scientific << " [ DEBUG ] " << " direction unit vector norm is " << norm(newdir) << std::endl;
 
-  // dot product between old and new direction vector
-  double dirdot = dot(newdir,v) / (norm(v) * norm(newdir));
-
-  if (debug)
+  if (debug) {
+    // dot product between old and new direction vector
+    double dirdot = dot(newdir,v) / (norm(v) * norm(newdir));
     std::cout << std::scientific << " [ DEBUG ] scatter dot product is " << dirdot << " and simulated angle is " << cos(theta) << std::endl;
+  }
 
   v = newdir * norm(v);
 
@@ -685,6 +685,7 @@ void Electron::update(std::vector<Electron*> &electron_list, int& total_ionizati
     } else if (prob < (ion_prob + ex_11_prob + ex_13_prob + ex_14_prob + ex_15_prob)) {
         remove_energy(14.22);
     } else if (prob < (ion_prob + ex_11_prob + ex_13_prob + ex_14_prob + ex_15_prob + col_prob)) {
+      //elastic_collision(u, vm);
         elastic_collision_diff(u, vm);
     }
     

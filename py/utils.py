@@ -32,7 +32,7 @@ class Graph:
         self.ionized = []
 
         for file in file_list:
-            _t, _x, _y, _z, _ke, _drift, _ionized = np.loadtxt(file, delimiter=',', unpack=True, ndmin=2)
+            _t, _x, _y, _z, _ke, _drift, s, _ionized = np.loadtxt(file, delimiter=',', unpack=True, ndmin=2)
             if smooth is True:
                 self.t.append(smooth_sig(_t, order, cutoff))
                 self.x.append(smooth_sig(_x, order, cutoff))
