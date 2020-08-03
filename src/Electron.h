@@ -53,6 +53,9 @@ private:
      */
     double x_sec_e_diff(double v) const
     {
+
+      if (is_gas == false) { return effective_xsec_liquid[index(v)]; }
+      
       auto idx = index_diff(v);
 
       auto xsec = momentum_xsec_gas_diff[idx];
