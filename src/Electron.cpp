@@ -721,7 +721,7 @@ void generate_plot(int volts, double cutoff, int cores, int write_every, int k, 
         electron_list.push_back(new Electron(0, volts, starting_pos(generator), random_velocity(generator, true), generator, debug));
 
         // Open the file to write to
-        std::ofstream file("../py/simulation-runs/" + std::to_string(volts) + "V - " + std::to_string(cores * i + (k + 1)) + ".txt");
+        std::ofstream file("../py/simulation-runs/" + std::to_string(volts) + "V_" + std::to_string(cores * i + (k + 1)) + ".txt");
         assert(file.is_open());
         
         // Grab initial conditions

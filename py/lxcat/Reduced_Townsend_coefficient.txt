@@ -1,0 +1,575 @@
+LXCat, www.lxcat.net
+Generated on 20 Aug 2020. All rights reserved.
+
+RECOMMENDED REFERENCE FORMAT
+- Dutton database, www.lxcat.net, retrieved on August 20, 2020.
+- LAPLACE database, www.lxcat.net, retrieved on August 20, 2020.
+- IST-Lisbon database, www.lxcat.net, retrieved on August 20, 2020.
+- UNAM database, www.lxcat.net, retrieved on August 20, 2020.
+Be aware that some databases and solvers can additionally have instructions how to reference corresponding data.
+Please check below in the headers of databases.
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+DATABASE:         Dutton database
+PERMLINK:         www.lxcat.net/Dutton
+DESCRIPTION:      This is an experimental database which includes, at present,  data for rare gases from J. Dutton,
+                  “Survey of Electron Swarm Data”, J. Phys. Chem. Ref. Data, 4, 577, 1975.  This publication also
+                  includes data for molecular gases, and their transcription into this database is in progress.  
+                  These data were imported into LXCat by Sanchita Chowdhury, LAPLACE, Toulouse, France, 2010-2011.
+HOW TO REFERENCE: Jack Dutton, “Survey of Electron Swarm Data”, J. Phys. Chem. Ref. Data, 4, 577, 1975
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+************************************************************************************************************************
+
+COMMENT: This is a summary of experimental results at ambient temperatures (unless otherwise stated) by different authors.
+         Brambring, J., Z. Phys., 179, 539 (1964)
+         Caren, R. P., Phys. Rev. 131, 1904 (1963)
+         Errett, D. D., Ph. D. Thesis, Purdue University, (1951)
+         Herreng, P., Compt. Rend. 217, 75 (1943)
+         Jager, G., Otto, W., Z. Phys., 169, 517 (1962)
+         Kruithof, A. A., Physica, 7, 519 (1940)
+         Levine, N. E., Uman, M. A., J. Appl. Phys. 35, 2618 (1964) 
+         Milne, J.G.C., Davies, D. E., Br. J. Appl. Phys., 10, 301(1959)
+         Nielsen, R. A., Phys. Rev. 50, 950 (1936)
+         Pack, J. L., Phelps, A. V., Phys. Rev. 121, 798 (1961)
+         Townsend, J. S., Bailey, V.A., Phil. Mag. 44, 1033 (1922)
+         Wagner, K. H., Z. Physik, 178, 64 (1964)
+         Wagner, E. B., Davis, F. J., Hurst, G. S., J. Chem. Phys. 47, 3138, (1967)
+         Warren, R. W., Parker, J. H., Phys. Rev. 128, 2661-2671 (1962).
+
+********************************************************** Ar **********************************************************
+
+SPECIES: e / Ar
+PROCESS: Reduced ionization coefficient (alpha/N)
+COMMENT: Kruithof 1940.
+UPDATED: 2011-10-20 07:22:46
+COLUMNS: Reduced electric field (Td) | Reduced Townsend coefficient (m2)
+-----------------------------
+ 1.412000e+1	6.800000e-25
+ 1.554000e+1	1.040000e-24
+ 1.695000e+1	1.580000e-24
+ 1.977000e+1	3.200000e-24
+ 2.260000e+1	5.900000e-24
+ 2.542000e+1	9.800000e-24
+ 2.825000e+1	1.600000e-23
+ 3.110000e+1	2.500000e-23
+ 3.390000e+1	3.600000e-23
+ 3.960000e+1	6.800000e-23
+ 4.520000e+1	1.090000e-22
+ 5.090000e+1	1.580000e-22
+ 5.650000e+1	2.160000e-22
+ 6.220000e+1	2.820000e-22
+ 7.060000e+1	4.000000e-22
+ 7.910000e+1	5.300000e-22
+ 9.040000e+1	7.400000e-22
+ 1.017000e+2	9.500000e-22
+ 1.130000e+2	1.220000e-21
+ 1.271000e+2	1.550000e-21
+ 1.412000e+2	1.900000e-21
+ 1.695000e+2	2.620000e-21
+ 1.977000e+2	3.350000e-21
+ 2.260000e+2	4.100000e-21
+ 2.542000e+2	4.800000e-21
+ 2.825000e+2	5.600000e-21
+ 3.390000e+2	7.000000e-21
+ 3.960000e+2	8.500000e-21
+ 4.520000e+2	9.800000e-21
+ 5.090000e+2	1.120000e-20
+ 5.650000e+2	1.250000e-20
+ 6.780000e+2	1.490000e-20
+ 7.910000e+2	1.700000e-20
+ 9.040000e+2	1.900000e-20
+ 1.017000e+3	2.070000e-20
+ 1.130000e+3	2.230000e-20
+ 1.271000e+3	2.400000e-20
+ 1.412000e+3	2.560000e-20
+ 1.695000e+3	2.830000e-20
+ 1.977000e+3	3.050000e-20
+ 2.260000e+3	3.200000e-20
+ 2.542000e+3	3.400000e-20
+ 2.825000e+3	3.500000e-20
+ 3.390000e+3	3.600000e-20
+ 3.960000e+3	3.800000e-20
+ 4.520000e+3	3.900000e-20
+-----------------------------
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+DATABASE:         LAPLACE (measurements after 1975)
+PERMLINK:         www.lxcat.net/LAPLACE
+DESCRIPTION:      These data were extracted from articles published after the 1975 or not appearing in the review
+                  article by Dutton (and the associated “Dutton” database). The data in this database were digitized
+                  by S Chowdhury (LAPLACE, Toulouse) from figures in the publications or from data tables if tables were
+                  provided in the publications.
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+************************************************************************************************************************
+
+COMMENT: This is a summary of experimental results at ambient temperatures (unless otherwise stated) by different authors. ATTN: 
+         Data from tables where provided, else digitized.  
+         Al-Amin, S. A., Lucas, J., J. Phys. D, 20, 1590, (1987)
+         Kucukarpaci, H. N., Lucas,J., J. Phys. D 14, 2001 (1981)
+         Lakshminarasimha, C. S., Lucas, J., J. Phys. D., 10, 313 (1977)
+         Milloy, H. B., Crompton, R. W., Aust. J. Phys., 30, 51, (1977)
+         Milne, J.G.C., Davies, D. E., Br. J. Appl. Phys., 10, 301(1959)
+         Nakamura, Y., Kurachi, M., J. Phys. D: Appl. Phys. 21, 718 (1988)
+         Nakamura, Y., 28th ICPIG, July 15-20, (2007)
+         Pack, J. L., Voshall, R. E., Phelps, A. V., Kline, L. E., J. App. Phys., 71,  5363, (1992)
+         Robertson A. G., Aust. J. Phys., 30, 39, (1977)
+          
+         Robertson A. G. and REES J. A., Aust. J. Phys., 25, 637 (1972)
+         Specht, L. T., Lawton, S. A., DeTemple, T. A., J. Appl. Phys., 51, 1,1980
+         Townsend J. S., et al., Phil. Mag. 44,1033 (1922).
+
+********************************************************** Ar **********************************************************
+
+SPECIES: e / Ar
+PROCESS: Reduced ionization coefficient (alpha/N)
+COMMENT: (Direct) Specht et al 1980.
+UPDATED: 2012-12-11 07:19:00
+COLUMNS: Reduced electric field (Td) | Reduced Townsend coefficient (m2)
+-----------------------------
+ 1.543860e+1	1.530490e-25
+ 1.571525e+1	1.739880e-25
+ 1.744265e+1	3.995180e-25
+ 1.937247e+1	8.709440e-25
+ 1.976383e+1	1.042900e-24
+ 2.141700e+1	1.873630e-24
+ 2.247638e+1	2.619070e-24
+ 2.428475e+1	4.587180e-24
+ 2.731444e+1	9.255390e-24
+-----------------------------
+
+SPECIES: e / Ar
+PROCESS: Reduced ionization coefficient (alpha/N)
+COMMENT: (Total) Specht et al 1980.
+UPDATED: 2012-12-11 07:19:12
+COLUMNS: Reduced electric field (Td) | Reduced Townsend coefficient (m2)
+-----------------------------
+ 4.607580e+0	1.378800e-25
+ 6.028420e+0	2.461380e-25
+ 7.530450e+0	3.810800e-25
+ 8.985120e+0	5.497590e-25
+ 1.064276e+1	7.204810e-25
+ 1.213802e+1	8.353340e-25
+ 1.336265e+1	9.256420e-25
+ 1.509472e+1	1.093530e-24
+ 1.758457e+1	2.015630e-24
+ 1.939783e+1	2.134710e-24
+ 1.983085e+1	2.148890e-24
+ 2.128552e+1	3.120670e-24
+ 2.274696e+1	3.690750e-24
+ 2.432341e+1	5.939220e-24
+ 2.732070e+1	9.369500e-24
+-----------------------------
+
+SPECIES: e / Ar
+PROCESS: Reduced ionization coefficient (alpha/N)
+COMMENT: Lakshminarasimha, et al 1977(high E/N).
+UPDATED: 2012-12-11 07:16:38
+COLUMNS: Reduced electric field (Td) | Reduced Townsend coefficient (m2)
+-----------------------------
+ 3.988600e+1	5.289900e-23
+ 5.815400e+1	1.245600e-22
+ 6.881100e+1	2.882700e-22
+ 9.073300e+1	4.901100e-22
+ 9.804000e+1	7.962900e-22
+ 1.467600e+2	1.366600e-21
+ 1.775100e+2	1.983700e-21
+ 2.554500e+2	3.436500e-21
+ 3.732800e+2	5.479400e-21
+ 4.457500e+2	7.050200e-21
+ 5.562700e+2	9.057100e-21
+ 7.502200e+2	1.232900e-20
+ 8.914900e+2	1.527900e-20
+ 1.123500e+3	1.723600e-20
+ 1.312000e+3	2.037900e-20
+ 1.509300e+3	2.116000e-20
+-----------------------------
+
+SPECIES: e / Ar
+PROCESS: Reduced ionization coefficient (alpha/N)
+COMMENT: Lakshminarasimha, et al 1977(low E/N).
+UPDATED: 2012-12-11 07:16:57
+COLUMNS: Reduced electric field (Td) | Reduced Townsend coefficient (m2)
+-----------------------------
+ 2.844500e+1	5.326200e-23
+ 4.060300e+1	1.280500e-22
+ 5.443200e+1	2.817000e-22
+ 6.877000e+1	5.042900e-22
+ 8.371200e+1	7.967600e-22
+ 1.129500e+2	1.388200e-21
+ 1.408400e+2	2.022200e-21
+ 1.703900e+2	2.643200e-21
+ 1.980000e+2	3.429100e-21
+ 2.267300e+2	4.064600e-21
+ 2.529500e+2	4.689200e-21
+-----------------------------
+
+SPECIES: e / Ar
+PROCESS: Reduced ionization coefficient (alpha/N)
+COMMENT: Milne et al 1959 (High E/N).
+UPDATED: 2012-12-11 07:17:33
+COLUMNS: Reduced electric field (Td) | Reduced Townsend coefficient (m2)
+-----------------------------
+ 5.639200e+1	8.662100e-23
+ 1.069900e+2	5.234200e-22
+ 1.813700e+2	1.825700e-21
+ 2.139800e+2	2.345400e-21
+ 2.612300e+2	3.253300e-21
+ 9.361000e+2	1.542300e-20
+ 1.119300e+3	1.756300e-20
+ 1.507300e+3	2.176400e-20
+-----------------------------
+
+SPECIES: e / Ar
+PROCESS: Reduced ionization coefficient (alpha/N)
+COMMENT: Milne et al 1959 (Low E/N).
+UPDATED: 2012-12-11 07:17:23
+COLUMNS: Reduced electric field (Td) | Reduced Townsend coefficient (m2)
+-----------------------------
+ 4.128500e+1	9.496100e-23
+ 8.444000e+1	5.344000e-22
+ 1.289600e+2	1.583500e-21
+ 1.694300e+2	2.405800e-21
+-----------------------------
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+DATABASE:         IST-Lisbon database
+PERMLINK:         www.lxcat.net/IST-Lisbon
+DESCRIPTION:      IST-Lisbon database contains up-to-date electron-neutral scattering cross sections (together with the
+                  measured swarm parameters used to validate these data), resulting from the research effort of the
+                  Group N-Plasmas Reactive: Modelling and Engineering (N-PRiME) with IPFN/IST (Instituto de Plasmas e
+                  Fusao Nuclear / Instituto Superior Tecnico), Lisbon, Portugal. The data, compiled from the literature,
+                  correspond to contributions from different authors (see detailed references in the database). For each
+                  gas the database presents a COMPLETE SET of cross sections, validated against measured swarm
+                  parameters by solving the two-term homogeneous electron Boltzmann equation. In most cases, predictions
+                  are in agreement with measurements within 1-20%, for reduced electric fields E/N ~ 1e-4 - 500 Td. To
+                  improve predictions at low E/N, some sets need to be completed with rotational cross sections, also
+                  available in the database.
+CONTACT:          LL Alves and V Guerra
+                  e-mail: llalves@@tecnico.ulisboa.pt
+HOW TO REFERENCE: L.L. Alves, ''The IST-Lisbon database on LXCat'' J. Phys. Conf. Series 2014, 565, 1
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+************************************************************************************************************************
+
+COMMENT: This is a summary of experimental results at ambient temperatures (unless otherwise stated) by different authors.
+         Bowe J C 1960 Phys. Rev. 117 1411
+         Christophorou L G, McCorkle D L, Maxey D V and Carter J G 1979 Nucl. Instrum. Methods 163 141 
+         Kucukarpaci H N and Lucas J 1981 J. Phys. D: Appl. Phys. 14 2001 
+         Nakamura Y and Kurachi M 1988 J. Phys. D: Appl. Phys. 21 718 
+         Nielsen R A 1936 Phys. Rev. 50 950 
+         Pack J L and Phelps A V 1961 Phys. Rev. 121 798 
+         Robertson A G 1977 Aust. J. Phys. 30 39 
+         Wagner E B, Davis F J and Hurst G S 1967 J. Chem. Phys. 47 3138 
+         Townsend J S and Bailey V A 1922 Phil. Mag. 44 1033 
+         Warren R W and Parker J H Jr 1962 Phys. Rev. 128 2661 
+         Abdulah (Puech V and Torchin L 1986 J. Phys. D: Appl. Phys. 19 2309) 
+         Bozin J V, Jelenak Z M, Velikic Z V, Belca I D, Petrovic Z Lj and Jelenkovic B M 1996 Phys. Rev. E 53 4007 
+         Golden D E and Fisher L H 1961 Phys. Rev. 123 1079 
+         Jelenak Z M, Velikic Z B, Bozin J V, Petrovic Z Lj and Jelenkovic B M 1993 Phys. Rev. E 47 3566 
+         Kruithof A A 1940 Physica 7 519 
+         Kruithof A A and Penning F M 1936 Physica 3 515 
+         Specht L T, Lawton S A and De Temple T A 1980 J. Appl. Phys. 51 166.
+         Data from these authors were used to fit a direct cross section set for argon in paper A. Yanguas-Gil, J. Cotrino and
+         L.L. Alves 2005 J. Phys. D: Appl. Phys. 38 1588–1598. The data for the Townsend ionization coefficient were updated in
+         June 2013.
+
+********************************************************** Ar **********************************************************
+
+SPECIES: e / Ar
+PROCESS: Reduced ionization coefficient (alpha/N)
+COMMENT: Abdulah (see Puech and Torchin 1986) - updated in June 2013.
+UPDATED: 2013-06-02 16:36:59
+COLUMNS: Reduced electric field (Td) | Reduced Townsend coefficient (m2)
+-----------------------------
+ 1.701095e+1	4.470000e-25
+ 1.585279e+1	5.620000e-25
+ 2.016723e+1	2.550000e-24
+ 2.834533e+1	1.240000e-23
+ 3.041617e+1	2.230000e-23
+ 5.068243e+1	1.750000e-22
+ 6.134099e+1	2.980000e-22
+ 8.202359e+1	6.350000e-22
+-----------------------------
+
+SPECIES: e / Ar
+PROCESS: Reduced ionization coefficient (alpha/N)
+COMMENT: Bozin et al 1996 - updated in June 2013.
+UPDATED: 2013-06-02 16:37:15
+COLUMNS: Reduced electric field (Td) | Reduced Townsend coefficient (m2)
+-----------------------------
+ 6.978306e+1	3.270000e-22
+ 7.798514e+1	3.450000e-22
+ 8.408937e+1	6.110000e-22
+ 9.195439e+1	7.030000e-22
+ 1.043497e+2	8.850000e-22
+ 1.157243e+2	1.150000e-21
+ 1.228845e+2	1.230000e-21
+ 1.303211e+2	1.400000e-21
+ 1.436067e+2	1.510000e-21
+ 1.558395e+2	1.900000e-21
+ 1.730476e+2	1.900000e-21
+ 1.730476e+2	2.370000e-21
+ 1.919107e+2	2.430000e-21
+ 2.211437e+2	3.190000e-21
+ 2.567902e+2	4.050000e-21
+ 2.702513e+2	4.340000e-21
+ 3.070726e+2	5.040000e-21
+ 3.162278e+2	5.410000e-21
+ 3.894230e+2	6.680000e-21
+ 4.758990e+2	8.320000e-21
+ 5.131497e+2	8.320000e-21
+ 6.701676e+2	1.110000e-20
+ 7.008081e+2	1.230000e-20
+ 7.952758e+2	1.230000e-20
+ 1.095862e+3	1.650000e-20
+ 1.475737e+3	2.230000e-20
+ 1.972120e+3	2.450000e-20
+ 2.485079e+3	2.680000e-20
+ 2.777167e+3	2.750000e-20
+ 3.768629e+3	3.220000e-20
+ 3.716048e+3	2.950000e-20
+ 3.940934e+3	2.800000e-20
+ 5.307036e+3	3.080000e-20
+ 5.678753e+3	2.870000e-20
+ 6.297764e+3	3.030000e-20
+ 7.996899e+3	2.560000e-20
+ 9.274077e+3	2.330000e-20
+-----------------------------
+
+SPECIES: e / Ar
+PROCESS: Reduced ionization coefficient (alpha/N)
+COMMENT: Golden and Fisher 1961 - updated in June 2013.
+UPDATED: 2013-06-02 15:13:06
+COLUMNS: Reduced electric field (Td) | Reduced Townsend coefficient (m2)
+-----------------------------
+ 1.565544e+1	1.080000e-25
+ 1.870394e+1	1.130000e-24
+ 2.175853e+1	3.970000e-24
+ 2.809988e+1	9.470000e-24
+ 3.135050e+1	1.470000e-23
+ 3.435247e+1	2.330000e-23
+ 3.753638e+1	3.680000e-23
+-----------------------------
+
+SPECIES: e / Ar
+PROCESS: Reduced ionization coefficient (alpha/N)
+COMMENT: Jelenak et al 1993 - updated in June 2013.
+UPDATED: 2013-06-02 16:37:30
+COLUMNS: Reduced electric field (Td) | Reduced Townsend coefficient (m2)
+-----------------------------
+ 7.517727e+1	3.190000e-22
+ 6.770020e+1	3.480000e-22
+ 8.284268e+1	5.930000e-22
+ 8.990082e+1	7.070000e-22
+ 9.970235e+1	8.500000e-22
+ 1.157767e+2	1.150000e-21
+ 1.210711e+2	1.230000e-21
+ 1.283994e+2	1.440000e-21
+ 1.384517e+2	1.550000e-21
+ 1.457108e+2	1.830000e-21
+ 1.605681e+2	1.920000e-21
+ 1.692028e+2	2.290000e-21
+ 1.864555e+2	2.390000e-21
+ 2.115943e+2	3.190000e-21
+ 2.511031e+2	3.960000e-21
+ 2.566163e+2	4.230000e-21
+ 3.002819e+2	5.040000e-21
+ 3.116157e+2	5.400000e-21
+ 3.808278e+2	6.690000e-21
+ 4.624490e+2	8.360000e-21
+ 4.866954e+2	7.970000e-21
+ 6.413601e+2	1.100000e-20
+ 6.706890e+2	1.220000e-20
+ 7.447624e+2	1.210000e-20
+ 1.048851e+3	1.590000e-20
+ 1.454628e+3	2.130000e-20
+ 1.902250e+3	2.410000e-20
+ 2.412499e+3	2.530000e-20
+ 2.720331e+3	2.710000e-20
+ 3.607785e+3	2.770000e-20
+ 3.663521e+3	3.230000e-20
+ 3.885269e+3	2.710000e-20
+ 5.042057e+3	2.970000e-20
+ 5.429855e+3	2.770000e-20
+ 5.937817e+3	2.910000e-20
+ 7.598191e+3	2.510000e-20
+ 8.811933e+3	2.240000e-20
+-----------------------------
+
+SPECIES: e / Ar
+PROCESS: Reduced ionization coefficient (alpha/N)
+COMMENT: Kruithof 1940 - updated in October 2017.
+UPDATED: 2017-10-13 16:02:47
+COLUMNS: Reduced electric field (Td) | Reduced Townsend coefficient (m2)
+-----------------------------
+ 1.413600e+1	6.785060e-25
+ 1.554900e+1	1.041790e-24
+ 1.696300e+1	1.577530e-24
+ 1.979000e+1	3.186150e-24
+ 2.261700e+1	5.857770e-24
+ 2.544400e+1	9.770490e-24
+ 2.827100e+1	1.628420e-23
+ 3.109800e+1	2.503410e-23
+ 3.392500e+1	3.646970e-23
+ 3.958000e+1	6.768100e-23
+ 4.523400e+1	1.085610e-22
+ 5.088800e+1	1.582620e-22
+ 5.654200e+1	2.165570e-22
+ 6.219600e+1	2.823720e-22
+ 7.067800e+1	3.965020e-22
+ 7.915900e+1	5.319490e-22
+ 9.046800e+1	7.382150e-22
+ 1.017800e+2	9.556760e-22
+ 1.130800e+2	1.216790e-21
+ 1.272200e+2	1.552080e-21
+ 1.413600e+2	1.898400e-21
+ 1.696300e+2	2.622430e-21
+ 1.979000e+2	3.354370e-21
+ 2.261700e+2	4.082350e-21
+ 2.544400e+2	4.819090e-21
+ 2.827100e+2	5.589200e-21
+ 3.392500e+2	7.053070e-21
+ 3.958000e+2	8.477940e-21
+ 4.523400e+2	9.847390e-21
+ 5.088800e+2	1.121570e-20
+ 5.654200e+2	1.251280e-20
+ 6.785100e+2	1.492040e-20
+ 7.915900e+2	1.705090e-20
+ 9.046800e+2	1.897100e-20
+ 1.017800e+3	2.072160e-20
+ 1.130800e+3	2.233420e-20
+ 1.272200e+3	2.405730e-20
+ 1.413555e+3	2.564190e-20
+ 1.696266e+3	2.836160e-20
+ 1.978977e+3	3.047620e-20
+ 2.261688e+3	3.218380e-20
+ 2.544399e+3	3.358610e-20
+ 2.827110e+3	3.471690e-20
+ 3.392532e+3	3.643580e-20
+ 3.957954e+3	3.767970e-20
+ 4.523377e+3	3.862960e-20
+-----------------------------
+
+SPECIES: e / Ar
+PROCESS: Reduced ionization coefficient (alpha/N)
+COMMENT: Kruithof and Penning 1936 - updated in June 2013.
+UPDATED: 2013-06-02 16:35:48
+COLUMNS: Reduced electric field (Td) | Reduced Townsend coefficient (m2)
+-----------------------------
+ 1.543750e+1	6.250000e-25
+ 1.818750e+1	1.660000e-24
+ 1.928125e+1	1.560000e-24
+ 2.190625e+1	4.880000e-24
+ 2.278125e+1	4.410000e-24
+ 2.512500e+1	6.560000e-24
+ 3.421875e+1	2.840000e-23
+ 3.625000e+1	3.310000e-23
+ 3.859375e+1	4.380000e-23
+ 4.187500e+1	6.090000e-23
+ 4.281250e+1	7.410000e-23
+ 5.171875e+1	1.280000e-22
+ 5.343750e+1	1.410000e-22
+ 5.681250e+1	1.910000e-22
+ 5.750000e+1	1.810000e-22
+ 6.171875e+1	2.440000e-22
+ 6.350000e+1	2.690000e-22
+ 6.421875e+1	2.660000e-22
+ 6.421875e+1	2.780000e-22
+ 7.134375e+1	3.250000e-22
+ 7.387500e+1	4.060000e-22
+ 7.581250e+1	4.380000e-22
+ 8.125000e+1	4.910000e-22
+ 1.068750e+2	9.530000e-22
+ 1.068750e+2	9.340000e-22
+ 1.071875e+2	9.720000e-22
+ 1.234375e+2	1.340000e-21
+ 1.425000e+2	1.720000e-21
+ 1.431250e+2	1.780000e-21
+ 1.621875e+2	2.110000e-21
+ 1.765625e+2	2.630000e-21
+ 1.778125e+2	2.660000e-21
+ 2.137500e+2	3.560000e-21
+ 2.246875e+2	3.770000e-21
+ 2.431250e+2	4.380000e-21
+ 3.243750e+2	6.470000e-21
+ 3.268750e+2	6.660000e-21
+ 4.240625e+2	8.940000e-21
+ 4.865625e+2	1.080000e-20
+ 4.918750e+2	1.090000e-20
+ 6.350000e+2	1.410000e-20
+ 6.487500e+2	1.480000e-20
+ 7.878125e+2	1.720000e-20
+ 8.478125e+2	1.850000e-20
+ 9.043750e+2	1.960000e-20
+ 1.271875e+3	2.530000e-20
+ 1.340938e+3	2.530000e-20
+-----------------------------
+
+SPECIES: e / Ar
+PROCESS: Reduced ionization coefficient (alpha/N)
+COMMENT: Specht et al 1980 (direct) - updated in June 2013.
+UPDATED: 2013-06-03 02:33:33
+COLUMNS: Reduced electric field (Td) | Reduced Townsend coefficient (m2)
+-----------------------------
+ 1.544000e+1	1.530000e-25
+ 1.572000e+1	1.740000e-25
+ 1.744000e+1	3.995000e-25
+ 1.937000e+1	8.709000e-25
+ 1.976000e+1	1.043000e-24
+ 2.142000e+1	1.874000e-24
+ 2.248000e+1	2.619000e-24
+ 2.428000e+1	4.587000e-24
+ 2.731000e+1	9.255000e-24
+-----------------------------
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+DATABASE:         UNAM database
+PERMLINK:         www.lxcat.net/UNAM
+DESCRIPTION:      Electron swarm data derived from a pulsed Townsend experiment at UNAM, México.
+CONTACT:          J. de Urquijo
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+************************************************************************************************************************
+
+COMMENT: J L Hernandez-Avila, E Basurto and J de Urquijo, Electron transport and ionization in CHF3-Ar and CHF3-N2 gas mixtures,
+         J. Phys. D: Appl. Phys. 37 (2004) 3088-309  DOI:10.1088/0022-3727/37/22/005.
+         Experimental accuracy is 2% for electron drift velocity, 10% for longitudinal diffusion coefficient and 8% for effective
+         ionisation coefficients.
+
+********************************************************** Ar **********************************************************
+
+SPECIES: e / Ar
+PROCESS: Reduced ionization coefficient (alpha/N)
+UPDATED: 2011-07-29 10:56:31
+COLUMNS: Reduced electric field (Td) | Reduced Townsend coefficient (m2)
+-----------------------------
+ 2.000000e+1	4.560000e-25
+ 2.200000e+1	9.600000e-25
+ 2.400000e+1	3.530000e-24
+ 2.600000e+1	6.010000e-24
+ 2.800000e+1	9.790000e-24
+ 3.000000e+1	1.280000e-23
+ 3.500000e+1	2.760000e-23
+ 4.000000e+1	5.120000e-23
+ 4.500000e+1	7.820000e-23
+ 5.000000e+1	1.130000e-22
+ 5.500000e+1	1.460000e-22
+ 6.000000e+1	1.910000e-22
+ 6.500000e+1	2.570000e-22
+ 7.000000e+1	3.160000e-22
+ 7.500000e+1	3.830000e-22
+ 8.000000e+1	3.670000e-22
+ 8.500000e+1	4.520000e-22
+ 9.000000e+1	5.090000e-22
+ 9.500000e+1	4.610000e-22
+ 1.400000e+2	9.120000e-22
+ 1.600000e+2	1.383300e-21
+ 1.800000e+2	1.864500e-21
+ 2.000000e+2	2.415200e-21
+ 2.200000e+2	2.818000e-21
+ 2.400000e+2	3.252500e-21
+ 2.600000e+2	3.893000e-21
+-----------------------------
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx

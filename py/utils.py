@@ -29,10 +29,13 @@ class Graph:
         self.z = []
         self.ke = []
         self.drift = []
+        self.angle = []
         self.ionized = []
 
         for file in file_list:
-            _t, _x, _y, _z, _ke, _drift, s, _ionized = np.loadtxt(file, delimiter=',', unpack=True, ndmin=2)
+            #_angle = 0.
+            _t, _x, _y, _z, _ke, _drift, _angle, _ionized = np.loadtxt(file, delimiter=',', unpack=True, ndmin=2)
+            #_t, _x, _y, _z, _ke, _drift,  _ionized = np.loadtxt(file, delimiter=',', unpack=True, ndmin=2)
             if smooth is True:
                 self.t.append(smooth_sig(_t, order, cutoff))
                 self.x.append(smooth_sig(_x, order, cutoff))
@@ -40,6 +43,7 @@ class Graph:
                 self.z.append(smooth_sig(_z, order, cutoff))
                 self.ke.append(smooth_sig(_ke, order, cutoff))
                 self.drift.append(smooth_sig(_drift, order, cutoff))
+                self.angle.append(smooth_sig(_angle, order, cutoff))
                 self.ionized.append(smooth_sig(_ionized, order, cutoff))
             else:
                 self.t.append(_t)
@@ -48,6 +52,7 @@ class Graph:
                 self.z.append(_z)
                 self.ke.append(_ke)
                 self.drift.append(_drift)
+                self.angle.append(_angle)
                 self.ionized.append(_ionized)
             self.n += 1
 

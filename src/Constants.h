@@ -23,7 +23,7 @@ const double beta = 1 / lambda;                 // Mean of the exponential distr
 
 // Editable parameters
 const bool is_gas = true;                      // Is this in gas? Or liquid? Make sure to update the number density
-const bool track_child_ions = true;             // Keep track of child electrons and their ionizations? Or only ionizations of the main, simulated electron?
+const bool track_child_ions = false;             // Keep track of child electrons and their ionizations? Or only ionizations of the main, simulated electron?
 const bool uniform_field = true;               // Is this in a uniform field? Or are we simulating a tip / tip array?
 const bool interactions = true;                 // Simulate interactions?
 const bool single_tip = true;                   // Is this is a non-uniform field, simulate a single tip? Or simulate an array of tips?
