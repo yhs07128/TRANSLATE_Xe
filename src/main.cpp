@@ -45,7 +45,7 @@ int main()
 
     int cores = std::thread::hardware_concurrency();
     if (cores < 1) cores = 1;
-    cores = 2;
+    cores = 1;
     int batches = 1;
 
     std::cout << "Batches (in groups of " + std::to_string(cores) + "): ";
@@ -58,6 +58,7 @@ int main()
 
 
     int debug = 0;
+    int status = 1;
     /*
     std::cout << "debug? ";
     std::cin >> debug;
@@ -74,7 +75,7 @@ int main()
         ProgressBar bar(cores);
 
         for (int k = 0; k < cores; k++) {
-	  branches[k] = std::thread(generate_plot, int(volts_list[j]), cutoff, cores, write_every, k, batches, debug, std::ref(bar));   
+	  branches[k] = std::thread(generate_plot, int(volts_list[j]), cutoff, cores, write_every, k, batches, debug, status, std::ref(bar));   
         }
     
         for (int k = 0; k < cores; k++) {
