@@ -58,7 +58,7 @@ int main()
 
 
     int debug = 0;
-    int status = 1;
+    int status = 0;
     /*
     std::cout << "debug? ";
     std::cin >> debug;

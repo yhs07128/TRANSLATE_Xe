@@ -691,7 +691,7 @@ void Electron::update(std::vector<Electron*> &electron_list, int& total_ionizati
 {
 
 
-  //if (K_max_var < 1e-10) {K_max_var = 1e-10; lambda_var = n * K_max_var; beta_var = 1./lambda_var; }
+  if (K_max_var < 1e-10) {K_max_var = 1e-10; lambda_var = n * K_max_var; beta_var = 1./lambda_var; }
 
   // update rates that determine sampling                                                                                                                                                                 
   // Draw a timestep and update the electron's position and velocity
@@ -728,9 +728,9 @@ void Electron::update(std::vector<Electron*> &electron_list, int& total_ionizati
     double xsec_tot = xsec_el + xsec_ioni + xsec_ex_11 + xsec_ex_13 + xsec_ex_14 + xsec_ex_15 + xsec_mom;
 
     // update rates that determine sampling
-    //K_max_var = norm(v) * xsec_tot * 10;
-    //lambda_var = n * K_max_var;
-    //beta_var = 1. / lambda_var;
+    K_max_var = norm(v) * xsec_tot * 10;
+    lambda_var = n * K_max_var;
+    beta_var = 1. / lambda_var;
     //std::cout << std::scientific << " @ energy " << energy << " K_max_var is " << K_max_var << " vs. default of " << K_max << std::endl;
     
     double col_prob = 0.0;
