@@ -3,7 +3,7 @@
 
 #include "LUTs/CrossSections.h"
 
-// Liquid number density
+// Liquid number density [cm^-3]
 const double n = 2.11e22;
 
 // Gas number densities
