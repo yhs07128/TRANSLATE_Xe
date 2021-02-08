@@ -25,6 +25,15 @@ int main()
     while (stream >> volts)
         volts_list.push_back(volts);
 
+    double elec_energy;
+    std::cout << "Electron starting energy [eV]:";
+    std::cin >> elec_energy;
+    while (std::cin.fail()) {
+      std::cin.clear();
+      std::cin.ignore();
+      std::cin >> elec_energy;
+    }
+    
     double cutoff;
     std::cout << "Stop After (s): ";
     std::cin >> cutoff;
@@ -75,7 +84,7 @@ int main()
         ProgressBar bar(cores);
 
         for (int k = 0; k < cores; k++) {
-	  branches[k] = std::thread(generate_plot, int(volts_list[j]), cutoff, cores, write_every, k, batches, debug, status, std::ref(bar));   
+	  branches[k] = std::thread(generate_plot, int(volts_list[j]), elec_energy, cutoff, cores, write_every, k, batches, debug, status, std::ref(bar));   
         }
     
         for (int k = 0; k < cores; k++) {

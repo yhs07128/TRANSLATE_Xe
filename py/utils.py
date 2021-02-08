@@ -31,10 +31,14 @@ class Graph:
         self.drift = []
         self.angle = []
         self.ionized = []
+        self.distance = [] # distance since the previous step
+        self.interactions = []
 
         for file in file_list:
+            #print ('file name : ',file)
             #_angle = 0.
-            _t, _x, _y, _z, _ke, _drift, _angle, _ionized = np.loadtxt(file, delimiter=',', unpack=True, ndmin=2)
+            _t, _x, _y, _z, _ke, _drift, _angle, _distance, _interactions, _ionized = np.loadtxt(file, delimiter=',', unpack=True, ndmin=2)
+            #_t, _x, _y, _z, _ke, _drift, _angle, _ionized, _distance = np.loadtxt(file, delimiter=',', unpack=True, ndmin=2)
             #_t, _x, _y, _z, _ke, _drift,  _ionized = np.loadtxt(file, delimiter=',', unpack=True, ndmin=2)
             if smooth is True:
                 self.t.append(smooth_sig(_t, order, cutoff))
@@ -45,6 +49,8 @@ class Graph:
                 self.drift.append(smooth_sig(_drift, order, cutoff))
                 self.angle.append(smooth_sig(_angle, order, cutoff))
                 self.ionized.append(smooth_sig(_ionized, order, cutoff))
+                self.distance.append(smooth_sig(_distance, order, cutoff))
+                self.interactions.append(smooth_sig(_interactions, order, cutoff))
             else:
                 self.t.append(_t)
                 self.x.append(_x)
@@ -54,6 +60,8 @@ class Graph:
                 self.drift.append(_drift)
                 self.angle.append(_angle)
                 self.ionized.append(_ionized)
+                self.distance.append(_distance)
+                self.interactions.append(_interactions)
             self.n += 1
 
     def M(self, recursive=False):

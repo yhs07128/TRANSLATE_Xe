@@ -20,3 +20,18 @@ cd build
 cmake ..
 make
 ```
+
+### Setup
+To run the code type `./larcade` and follow the prompts. To change running configuration edit the `srcs/Constants.h` file and specifically update the value of `n`, the density of argon atoms, `is_diff` and `is_gas` to choose the simulation mode.
+
+### Notebooks
+Validations of swarm parameters are carried out through the notebooks below:
+
+```
+lar-diffusion-simple.ipynb
+gar-diffusion.ipynb
+lar-drift-velocity.ipynb
+gar-drift-velocity.ipynb
+lar-amplification-townsend.ipynb
+gar-amplification-townsend.ipynb
+```
