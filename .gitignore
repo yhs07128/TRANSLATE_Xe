@@ -1,4 +1,6 @@
 .DS_Store
 build/
 py/preprocessing/.ipynb_checkpoints/
+py/
+!py/ipynb
 *~
