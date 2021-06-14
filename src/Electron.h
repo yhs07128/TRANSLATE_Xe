@@ -271,6 +271,7 @@ public:
   inline Vec position() const { return _x; }
   inline Vec velocity() const { return _v; }
   inline double elapsed_time() const { return _total_time; }
+  inline double timestep() const { return _time_to_collision; }
   inline double ke() const { return _energy; }
   inline double angle() const { return _scatteringangle; }
   inline double distancesincelastinteraction() const { return _dist; }

@@ -438,11 +438,13 @@ int Electron::index_diff(double v) const {
  * @param eV The energy to be removed (in eV)
  */
 void Electron::remove_energy(double eV) {
-  
+
   _energy -= eV;
-  
-  if (_energy < 0)
-    _energy = 0;
+
+  if (_energy < 0.01)
+    _energy = 0.01; // don't go below 0.01 eV
+
+  //std::cout << std::scientific << "subtracting energy " << eV << " and now energy is " << _energy << std::endl;
   
   _v = sqrt((2 * eV_to_J(_energy)) / m_e) * (_v / norm(_v));
   
@@ -690,6 +692,9 @@ double Electron::next_collision(double u) {
   if (time_step > 3 * _beta_var)
     time_step = 3 * _beta_var;
 
+  //if (time_step > 1e-12)
+  //std::cout << std::scientific << "time-step is " << time_step << std::endl;
+
   if (time_step > 1e-12)
     time_step = 1e-12;
   
@@ -841,19 +846,19 @@ void Electron::update(std::vector<Electron*> &electron_list, int& total_ionizati
     _interaction = 1;
     //std::cout << "IONIZATION! " << std::endl;
   } else if (prob < (ion_prob + ex_11_prob)) {
-    remove_energy(0.00);
+    remove_energy(11.68);
     hasinteracted = true;
     _interaction = 2;
   } else if (prob < (ion_prob + ex_11_prob + ex_13_prob)) {
-    remove_energy(11.68);
+    remove_energy(13.21);
     hasinteracted = true;
     _interaction = 3;
   } else if (prob < (ion_prob + ex_11_prob + ex_13_prob + ex_14_prob)) {
-    remove_energy(13.33);
+    remove_energy(14.10);
     hasinteracted = true;
     _interaction = 4;
   } else if (prob < (ion_prob + ex_11_prob + ex_13_prob + ex_14_prob + ex_15_prob)) {
-    remove_energy(14.22);
+    remove_energy(15.23);
     hasinteracted = true;
     _interaction = 5;
   } else if (prob < (ion_prob + ex_11_prob + ex_13_prob + ex_14_prob + ex_15_prob + col_prob)) {
@@ -918,6 +923,7 @@ void generate_plot(int volts, double elec_energy, double cutoff, int cores, int 
     if (!uniform_field)
       starting_x = electron_list[0]->position().x;
     double t = electron_list.front()->elapsed_time();
+    double dt = electron_list.front()->timestep();
     double x = electron_list.front()->position().x;
     double y = electron_list.front()->position().y;
     double z = electron_list.front()->position().z;
@@ -933,23 +939,55 @@ void generate_plot(int volts, double elec_energy, double cutoff, int cores, int 
     while (electron_list[0]->elapsed_time() < cutoff) {
       // Update electrons, adding child electrons if necessary
       std::vector<Electron*> new_electrons;
-      for (auto elec : electron_list)
-	elec->update(new_electrons, total_ionizations);
+
+      for (size_t el=0; el < electron_list.size(); el++) {
+	
+	auto thiselec = electron_list.at(el);
+	
+	thiselec->update(new_electrons, total_ionizations);
+	//electron_list.insert(electron_list.end(), new_electrons.begin(), new_electrons.end());
+
+	//if (el > 0) continue;
+
+      // save info for all electrons
+      //for (size_t el=0; el < electron_list.size(); el++) {
+
+      //if ( (track_child_ions == false) and (el > 0) ) continue;
+
+	// Only save every write_every steps
+	if (el == 0) simulation_step += 1;
+	
+	if (simulation_step % write_every != 0)
+	  continue;
+	
+      //auto thiselec = electron_list.at(el);
+      
+	// Get the relevant information of the primary electron (saved here in case this loop ends)
+	t = thiselec->elapsed_time();
+	dt = thiselec->timestep();  
+	x = thiselec->position().x;
+	y = thiselec->position().y;
+	z = thiselec->position().z;
+	ke = thiselec->ke();
+	vd = (x - starting_x) / t;
+	s  = thiselec->angle();
+	dist = thiselec->distancesincelastinteraction();
+	
+	if (status && s >= 0) { std::cout << "@ step " << simulation_step
+					  << " [x,y,z] -> " << "[ " << x << ", " << y << ", " << z << " ]"
+					  << " energy : " << ke << " scatter angle : " << s << std::endl; }
+	
+	
+	// Write the primary electron's information to a file (if using the full ionization algorithm, this may cause only the time and total ionizations to be accurate)
+	file << t * 1e9 << "," << dt * 1e9 << ", " << x * 1e6 << "," << y * 1e6 << "," << z * 1e6 << "," << ke << ","
+	     << vd << ","<< s << "," << dist << "," << interactions << ","
+	     << total_ionizations;
+	if (track_child_ions == true) file << "," << el;
+	file << "\n";
+      }// loop through electrons and update their position / text-file
+
+      
       electron_list.insert(electron_list.end(), new_electrons.begin(), new_electrons.end());
-      
-      // Get the relevant information of the primary electron (saved here in case this loop ends)
-      t = electron_list.front()->elapsed_time();
-      x = electron_list.front()->position().x;
-      y = electron_list.front()->position().y;
-      z = electron_list.front()->position().z;
-      ke = electron_list.front()->ke();
-      vd = (x - starting_x) / t;
-      s  = electron_list.front()->angle();
-      dist = electron_list.front()->distancesincelastinteraction();
-      
-      if (status && s >= 0) { std::cout << "@ step " << simulation_step
-					<< " [x,y,z] -> " << "[ " << x << ", " << y << ", " << z << " ]"
-					<< " energy : " << ke << " scatter angle : " << s << std::endl; }
       
       // Remove electrons that have reached the anode
       if (!uniform_field)
@@ -959,9 +997,6 @@ void generate_plot(int volts, double elec_energy, double cutoff, int cores, int 
       if ((!uniform_field) && (electron_list.size() == 0))
 	break;
       
-      // Only save every write_every steps
-      if (simulation_step++ % write_every != 0)
-	continue;
       
       // Update the progress bar
       if (uniform_field)
@@ -973,19 +1008,18 @@ void generate_plot(int volts, double elec_energy, double cutoff, int cores, int 
       if (bar.min_prog(k))
 	bar.display();
       
-      // Write the primary electron's information to a file (if using the full ionization algorithm, this may cause only the time and total ionizations to be accurate)
-      file << t * 1e9 << "," << x * 1e6 << "," << y * 1e6 << "," << z * 1e6 << "," << ke << ","
-	   << vd << ","<< s << "," << dist << "," << interactions << ","
-	   << total_ionizations << "\n";
-    }
+      
+    }// while simulation is to run...
     
     // Update the progress bar one last time
     bar.update(1, k);
-    
+
+    /*
     // Write information to the file one last time (to catch all final ionizations)
     file << t * 1e9 << "," << x * 1e6 << "," << y * 1e6 << "," << z * 1e6 << "," << ke << ","
 	 << vd << ","<< s << "," << dist << "," << interactions << ","
-	 << total_ionizations << "\n";
+	 << total_ionizations << ", 0" << "\n";
+    */
     file.close();
     assert(!file.is_open());
   }
