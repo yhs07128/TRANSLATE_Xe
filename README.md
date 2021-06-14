@@ -24,6 +24,10 @@ make
 ### Setup
 To run the code type `./larcade` and follow the prompts. To change running configuration edit the `srcs/Constants.h` file and specifically update the value of `n`, the density of argon atoms, `is_diff` and `is_gas` to choose the simulation mode.
 
+Default gas mode (integrated xsec): `n = 1.15e19`, `is_diff = false`, and `is_gas = true`.
+Default liquid mode (integrated xsec): `n = 2.11e22`, `is_diff = false`, and `is_gas = false`.
+
+
 ### Notebooks
 Validations of swarm parameters are carried out through the notebooks below:
 
