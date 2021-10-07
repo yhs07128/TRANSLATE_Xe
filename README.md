@@ -1,5 +1,6 @@
-# LArCADe
-Simulation of electron transport in LAr under non-uniform electric fields for LArCADe at FNAL. Studies generated with this simulation can be found at https://github.com/zbeever/LArCADe-studies.
+![logo](https://github.com/davidc1/SimLArCADe/blob/larxsec/TRANSLATE_LOGO.png)
+
+Simulation of electron transport in LAr under varying electric fields. Code repository developed starting from https://github.com/zbeever/LArCADe.
 
 Basis of simulation outlined in Wojcik, M., & Tachiya, M. (2002). Electron transport and electron–ion recombination in liquid argon: Simulation based on the Cohen–Lekner theory. Chemical Physics Letters, 363(3-4), 381-388. doi:10.1016/s0009-2614(02)01177-6
 
@@ -29,6 +30,7 @@ Default liquid mode (integrated xsec): `n = 2.11e22`, `is_diff = false`, and `is
 
 ### Simulation Output
 Information for each simulated electron is stored in text files. Each iteration of the simulation for which output is stored is saved as a new row, and information in each row is arranged as described below, separated by commas:
+
 time (ns), time-step (ns), x coordinate (um), y coordainte (um), z coordainte (um), kinetic energy (eV), drift velocity (m/s), scattering angle (degrees), distance since last interaction (meters), interaction category, total ionizations initiated
 
 ### Notebooks
