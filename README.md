@@ -25,7 +25,19 @@ make
 ### Setup
 To run the code type `./larcade` and follow the prompts. To change running configuration edit the `srcs/Constants.h` file and specifically update the value of `n`, the density of argon atoms, `is_diff` and `is_gas` to choose the simulation mode.
 
+Configurable constants:
+
+```
+// Liquid number density [cm^-3]                                                                                                                       
+const double n = 2.11e22;       // Number density of argon atoms
+
+// Editable parameters                                                                                                                                 
+const bool is_diff = false;     // Use differential cross-sections?                                                                    
+const bool is_gas = false;      // Is this in gas? Or liquid? Make sure to update the number density 
+```
+
 Default gas mode (integrated xsec): `n = 1.15e19`, `is_diff = false`, and `is_gas = true`.
+
 Default liquid mode (integrated xsec): `n = 2.11e22`, `is_diff = false`, and `is_gas = false`.
 
 ### Simulation Output
