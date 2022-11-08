@@ -19,7 +19,7 @@ def smooth_sig(xn, order, cutoff):
     return y
 
 class Graph:
-    def __init__(self, file_list, smooth=False, order=3, cutoff=0.01):
+    def __init__(self, file_list, smooth=False, order=3, cutoff=0.01, nvar=10):
         self.n = 0
         self.tail_percent = 0.05
         
@@ -33,13 +33,17 @@ class Graph:
         self.ionized = []
         self.distance = [] # distance since the previous step
         self.interactions = []
+        self.nvar = nvar
 
         for file in file_list:
             #print ('file name : ',file)
             #_angle = 0.
-            _t, _x, _y, _z, _ke, _drift, _angle, _distance, _interactions, _ionized = np.loadtxt(file, delimiter=',', unpack=True, ndmin=2)
+            if (self.nvar == 10):
+                _t,  _x, _y, _z, _ke, _drift, _angle, _distance, _interactions, _ionized = np.loadtxt(file, delimiter=',', unpack=True, ndmin=2)
             #_t, _x, _y, _z, _ke, _drift, _angle, _ionized, _distance = np.loadtxt(file, delimiter=',', unpack=True, ndmin=2)
-            #_t, _x, _y, _z, _ke, _drift,  _ionized = np.loadtxt(file, delimiter=',', unpack=True, ndmin=2)
+            if (self.nvar == 7):
+                _t, _x, _y, _z, _ke, _drift,  _ionized = np.loadtxt(file, delimiter=',', unpack=True, ndmin=2)
+
             if smooth is True:
                 self.t.append(smooth_sig(_t, order, cutoff))
                 self.x.append(smooth_sig(_x, order, cutoff))
@@ -47,10 +51,12 @@ class Graph:
                 self.z.append(smooth_sig(_z, order, cutoff))
                 self.ke.append(smooth_sig(_ke, order, cutoff))
                 self.drift.append(smooth_sig(_drift, order, cutoff))
-                self.angle.append(smooth_sig(_angle, order, cutoff))
                 self.ionized.append(smooth_sig(_ionized, order, cutoff))
-                self.distance.append(smooth_sig(_distance, order, cutoff))
-                self.interactions.append(smooth_sig(_interactions, order, cutoff))
+                if (self.nvar == 10):
+                    self.angle.append(smooth_sig(_angle, order, cutoff))
+                    self.distance.append(smooth_sig(_distance, order, cutoff))
+                    self.interactions.append(smooth_sig(_interactions, order, cutoff))
+
             else:
                 self.t.append(_t)
                 self.x.append(_x)
@@ -58,11 +64,14 @@ class Graph:
                 self.z.append(_z)
                 self.ke.append(_ke)
                 self.drift.append(_drift)
-                self.angle.append(_angle)
                 self.ionized.append(_ionized)
-                self.distance.append(_distance)
-                self.interactions.append(_interactions)
-            self.n += 1
+
+                if (self.nvar == 10):
+                    self.angle.append(_angle)
+                    self.distance.append(_distance)
+                    self.interactions.append(_interactions)
+
+                self.n += 1
 
     def M(self, recursive=False):
         avg_ending_dist = sum([(self.x[i][-1]**2 + self.y[i][-1]**2 + self.z[i][-1]**2)**0.5 for i in range(self.n)]) / self.n
