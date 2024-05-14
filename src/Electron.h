@@ -241,14 +241,17 @@ private:
       
         switch (level) {
 	  
+            case 8:
+                return excite_xsec_8[idx];
+            case 9:
+                return excite_xsec_9[idx];
+            case 10:
+                return excite_xsec_10[idx];
             case 11:
                 return excite_xsec_11[idx];
-            case 13:
-                return excite_xsec_13[idx];
-            case 14:
-                return excite_xsec_14[idx];
-	    case 15:
-	      return excite_xsec_15[idx];
+            case 12:
+                return excite_xsec_12[idx];
+
             default:
                 assert(false);
         }

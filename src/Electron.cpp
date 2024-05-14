@@ -770,10 +770,11 @@ void Electron::update(std::vector<Electron*> &electron_list, int& total_ionizati
   // collect all xsec values
   double xsec_el    =   (is_diff) ? x_sec_e_diff(u) : x_sec_e(u);
   double xsec_ioni  =   x_sec_i(u);
-  double xsec_ex_11 =   x_sec_ex(u,11);
-  double xsec_ex_13 =	x_sec_ex(u,13);
-  double xsec_ex_14 =	x_sec_ex(u,14);
-  double xsec_ex_15 =	x_sec_ex(u,15);
+  double xsec_ex_8 =   x_sec_ex(u,8);
+  double xsec_ex_9 =	x_sec_ex(u,9);
+  double xsec_ex_10 =	x_sec_ex(u,10);
+  double xsec_ex_11 =	x_sec_ex(u,11);
+  double xsec_ex_12 =	x_sec_ex(u,12);
 
   // if in gas and using differential xsec, xsec_el should be zero
   if ( (is_diff == true) and (is_gas == true) ) xsec_el = 0.;
@@ -786,7 +787,7 @@ void Electron::update(std::vector<Electron*> &electron_list, int& total_ionizati
   
   double xsec_mom = (is_diff == true) ? x_sec_p_diff(u) : 0.;
   
-  double xsec_tot = xsec_el + xsec_ioni + xsec_ex_11 + xsec_ex_13 + xsec_ex_14 + xsec_ex_15 + xsec_mom;
+  double xsec_tot = xsec_el + xsec_ioni + xsec_ex_8 + xsec_ex_9 + xsec_ex_10 + xsec_ex_11 + xsec_ex_12 + xsec_mom;
 
   //std::cout << std::scientific << "Energy : " << _energy << " w/ xsec_mom : " << xsec_mom << " and xsec_el : " << xsec_el << " and xsec_tot : " << xsec_tot << std::endl;
 
@@ -808,29 +809,32 @@ void Electron::update(std::vector<Electron*> &electron_list, int& total_ionizati
   if (_debug) {std::cout << std::scientific << "[ DEBUG ] velocity "  << u << " and prob " << col_prob << std::endl; }
   if (_debug) { std::cout << "[ DEBUG ] ionization..." << std::endl; }
   double ion_prob = probability(u, xsec_ioni);
+  if (_debug) { std::cout << "[ DEBUG ] excitation 8..." << std::endl; }
+  double ex_8_prob = probability(u, xsec_ex_8);
+  if (_debug) { std::cout << "[ DEBUG ] excitation 9..." << std::endl; }
+  double ex_9_prob = probability(u, xsec_ex_9);
+  if (_debug) { std::cout << "[ DEBUG ] excitation 10..." << std::endl; }
+  double ex_10_prob = probability(u, xsec_ex_10);
   if (_debug) { std::cout << "[ DEBUG ] excitation 11..." << std::endl; }
   double ex_11_prob = probability(u, xsec_ex_11);
-  if (_debug) { std::cout << "[ DEBUG ] excitation 13..." << std::endl; }
-  double ex_13_prob = probability(u, xsec_ex_13);
-  if (_debug) { std::cout << "[ DEBUG ] excitation 14..." << std::endl; }
-  double ex_14_prob = probability(u, xsec_ex_14);
-  if (_debug) { std::cout << "[ DEBUG ] excication 15..." << std::endl; }
-  double ex_15_prob = probability(u, xsec_ex_15);
+  if (_debug) { std::cout << "[ DEBUG ] excitation 12..." << std::endl; }
+  double ex_12_prob = probability(u, xsec_ex_12);
   if (_debug) { std::cout << "[ DEBUG ] momentum..." << std::endl; }
   double mom_prob = 0;
   if (is_gas == false) {  mom_prob = probability(u, xsec_mom); }
   if ( (is_gas == true) && (is_diff == true) ) { mom_prob = probability(u, xsec_mom); }
   
-  assert(col_prob + ion_prob + ex_11_prob + ex_13_prob + ex_14_prob + ex_15_prob + mom_prob <= 1);
+  assert(col_prob + ion_prob + ex_8_prob + ex_9_prob + ex_10_prob + ex_11_prob + ex_12_prob + mom_prob <= 1);
   
   // If interactions are turned off, set all probabilities to 0
   if (!interactions) {
     col_prob = 0;
     ion_prob = 0;
+    ex_8_prob = 0;
+    ex_9_prob = 0;
+    ex_10_prob = 0;
     ex_11_prob = 0;
-    ex_13_prob = 0;
-    ex_14_prob = 0;
-    ex_15_prob = 0;
+    ex_12_prob = 0;
   }
   
   std::uniform_real_distribution<double> rand_event(0.0, 1.0);
@@ -845,32 +849,36 @@ void Electron::update(std::vector<Electron*> &electron_list, int& total_ionizati
     hasinteracted = true;
     _interaction = 1;
     //std::cout << "IONIZATION! " << std::endl;
-  } else if (prob < (ion_prob + ex_11_prob)) {
-    remove_energy(11.68);
+  } else if (prob < (ion_prob + ex_8_prob)) {
+    remove_energy(8.4);
     hasinteracted = true;
     _interaction = 2;
-  } else if (prob < (ion_prob + ex_11_prob + ex_13_prob)) {
-    remove_energy(13.21);
+  } else if (prob < (ion_prob + ex_8_prob + ex_9_prob)) {
+    remove_energy(9.8);
     hasinteracted = true;
     _interaction = 3;
-  } else if (prob < (ion_prob + ex_11_prob + ex_13_prob + ex_14_prob)) {
-    remove_energy(14.10);
+  } else if (prob < (ion_prob + ex_8_prob + ex_9_prob + ex_10_prob)) {
+    remove_energy(10.5);
     hasinteracted = true;
     _interaction = 4;
-  } else if (prob < (ion_prob + ex_11_prob + ex_13_prob + ex_14_prob + ex_15_prob)) {
-    remove_energy(15.23);
+  } else if (prob < (ion_prob + ex_8_prob + ex_9_prob + ex_10_prob + ex_11_prob)) {
+    remove_energy(11.3);
     hasinteracted = true;
     _interaction = 5;
-  } else if (prob < (ion_prob + ex_11_prob + ex_13_prob + ex_14_prob + ex_15_prob + col_prob)) {
-    elastic_collision(u,vm); 
+  } else if (prob < (ion_prob + ex_8_prob + ex_9_prob + ex_10_prob + ex_11_prob + ex_12_prob)) {
+    remove_energy(12.55);
     hasinteracted = true;
     _interaction = 6;
-    if (_status) { std::cout << "\t energy collision " << std::endl; }
-  }
-  else if (prob < (ion_prob + ex_11_prob + ex_13_prob + ex_14_prob + ex_15_prob + col_prob + mom_prob)) {
-    momentum_collision(u, vm);
+  } else if (prob < (ion_prob + ex_8_prob + ex_9_prob + ex_10_prob + ex_11_prob + ex_12_prob + col_prob)) {
+    elastic_collision(u,vm); 
     hasinteracted = true;
     _interaction = 7;
+    if (_status) { std::cout << "\t energy collision " << std::endl; }
+  }
+  else if (prob < (ion_prob + ex_8_prob + ex_9_prob + ex_10_prob + ex_11_prob + ex_12_prob + col_prob + mom_prob)) {
+    momentum_collision(u, vm);
+    hasinteracted = true;
+    _interaction = 8;
     if (_status) { std::cout << "\t momentum collision " << std::endl; }
   }
   
